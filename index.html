@@ -730,6 +730,32 @@
       flex-shrink: 0;
     }
 
+    .teaser-box{
+  margin-top: 0;
+  padding: 18px;
+  background: linear-gradient(180deg,var(--surface),var(--bg2));
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.teaser-box h3{
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+
+.teaser-box p{
+  color: var(--muted);
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.action-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+    
     .divider {
       height: 1px;
       background: var(--border);
@@ -997,6 +1023,16 @@
             </div>
             <div class="scenario-grid" id="scenarioGrid"></div>
           </div>
+        <div class="panel" style="margin-top:0">
+  <div class="panel-label">Pro insights</div>
+  <div class="teaser-box">
+    <h3>Pro insights</h3>
+    <p>Unlock deeper SaaS planning next: pricing tier stress tests, cohort churn analysis, CAC payback timing, growth channel modeling, and a clearer path to sustainable MRR.</p>
+    <div class="action-row">
+      <button class="btn-ghost">Unlock pro insights</button>
+       </div>
+        </div>
+        </div>
         </div>
       </div>
     </section>
