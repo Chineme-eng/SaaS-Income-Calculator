@@ -1,1 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaaS Growth Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Georgia&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root {
+      --bg:       #faf7f2;
+      --bg2:      #f3efe8;
+      --bg3:      #ede8df;
+      --surface:  #ffffff;
+      --border:   #ddd8ce;
+      --border2:  #c8c2b6;
+      --text:     #1a1612;
+      --muted:    #7a7268;
+      --faint:    #b8b2a8;
+      --accent:   #b85c2a;
+      --accent2:  #9a4a20;
+      --accent-bg:#fdf0e8;
+      --green:    #2e7d52;
+      --green-bg: #eaf4ee;
+      --red:      #b83232;
+      --red-bg:   #fdeaea;
+      --amber:    #a06010;
+      --amber-bg: #fef6e4;
+      --blue:     #466b94;
+      --blue-bg:  #edf3fa;
+      --serif:    'EB Garamond', Georgia, serif;
+      --mono:     'IBM Plex Mono', monospace;
+      --r:        8px;
+      --r2:       12px;
+      --shadow:   0 1px 4px rgba(26,22,18,0.07);
+      --shadow2:  0 2px 12px rgba(26,22,18,0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg:       #100e0b;
+      --bg2:      #181510;
+      --bg3:      #201d18;
+      --surface:  #241f19;
+      --border:   #332d25;
+      --border2:  #4a4238;
+      --text:     #ede6da;
+      --muted:    #8a8070;
+      --faint:    #4a4238;
+      --accent:   #d4784a;
+      --accent2:  #e8905c;
+      --accent-bg:#2a1e14;
+      --green:    #3aaa6a;
+      --green-bg: #0e2018;
+      --red:      #d45050;
+      --red-bg:   #220e0e;
+      --amber:    #c88030;
+      --amber-bg: #201608;
+      --blue:     #6d96c7;
+      --blue-bg:  #12202f;
+      --shadow:   0 1px 4px rgba(0,0,0,0.3);
+      --shadow2:  0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      transition: background .3s, color .3s;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav-brand span { color: var(--accent); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+
+    .theme-btn, .mini-btn, .mode-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .theme-btn:hover,
+    .mini-btn:hover,
+    .mode-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    .hero {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 3.5rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -.01em;
+      margin-bottom: 1rem;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 640px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-bar-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .money-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+
+    .money-prefix {
+      font-family: var(--mono);
+      font-size: 18px;
+      padding: 8px 12px;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .money-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      padding: 8px 12px;
+      width: 140px;
+      text-align: right;
+    }
+
+    .section-head {
+      margin-bottom: 1.25rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .section-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 430px;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 3rem;
+    }
+
+    @media(max-width:960px){
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel + .panel { margin-top: 16px; }
+
+    .panel-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
+    }
+
+    .preset-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .preset-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+
+    .preset-card.active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      box-shadow: var(--shadow2);
+    }
+
+    .pc-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .pc-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .pc-desc {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      line-height: 1.4;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media(max-width:640px){
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-family: var(--serif);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .mono { font-family: var(--mono); }
+
+    .inline-money {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .inline-money span {
+      padding: 11px 12px;
+      font-family: var(--mono);
+      color: var(--muted);
+      background: var(--bg3);
+      border-right: 1px solid var(--border);
+    }
+
+    .inline-money input {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      padding: 11px 12px;
+      width: 100%;
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: sticky;
+      top: 72px;
+    }
+
+    @media(max-width:960px){
+      .results { position: static; }
+    }
+
+    .big-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .big-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent);
+    }
+
+    .big-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .big-val {
+      font-family: var(--serif);
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: -.02em;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    .big-sub {
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-l {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .stat-v {
+      font-family: var(--mono);
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    .stat-s {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .warning-box,
+    .info-box,
+    .soft-box,
+    .blue-box {
+      border-radius: var(--r);
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      border-left: 3px solid;
+    }
+
+    .warning-box {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .info-box {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .soft-box {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .blue-box {
+      background: var(--blue-bg);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mini-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .mini-k {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .mini-v {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .pricing-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pricing-table th {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .pricing-table td {
+      font-size: 14px;
+    }
+
+    .timeline-grid,
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .timeline-card,
+    .scenario-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .timeline-top,
+    .scenario-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-name,
+    .scenario-name {
+      font-family: var(--serif);
+      font-size: 18px;
+    }
+
+    .timeline-price,
+    .scenario-price {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .timeline-desc,
+    .scenario-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    .chart-wrap {
+      padding-top: 4px;
+    }
+
+    .bar-track {
+      height: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .bar-seg {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: width .35s ease;
+      color: #fff;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 3rem 0;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .tip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .tip-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .tip-title {
+      font-family: var(--serif);
+      font-size: 15px;
+      font-weight: 400;
+      margin-bottom: 6px;
+    }
+
+    .tip-body {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--serif);
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .04em;
+      line-height: 2;
+    }
+
+    .small-note {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    @media print {
+      nav, .theme-btn, .mini-btn, .mode-row { display:none !important; }
+      body { background:#fff; color:#000; }
+      .wrap { max-width:none; padding:0; }
+      .results { position:static; }
+      .panel, .big-card, .stat, .timeline-card, .scenario-card, .tip-card, .mini-card {
+        box-shadow:none;
+      }
+      .divider { margin: 1.5rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="#" onclick="return false;"><span>Kat</span>Tools</a>
+    <div class="nav-right">
+      <a class="nav-link" href="#calculator">Calculator</a>
+      <a class="nav-link" href="#timeline">Timeline</a>
+      <a class="nav-link" href="#tips">Tips</a>
+      <button class="theme-btn" onclick="window.print()">Save / Print</button>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark mode</button>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-eyebrow">Founder mode</div>
+      <h1>The SaaS<br><em>Growth</em> Simulator</h1>
+      <p class="hero-sub">
+        Model your users, churn, pricing, costs, and growth to see if your SaaS can actually scale —
+        or if it breaks before it gets there.
+      </p>
+      <div class="hero-bar">
+        <span class="hero-bar-label">Monthly price per user</span>
+        <div class="money-input-wrap">
+          <span class="money-prefix">$</span>
+          <input id="priceTop" class="money-input" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
+        </div>
+      </div>
+    </header>
+
+    <section id="calculator">
+      <div class="section-head">
+        <span class="section-title">Build your SaaS model</span>
+        <span class="section-sub">pricing + users + churn + costs</span>
+      </div>
+
+      <div class="main-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">SaaS presets</span>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+            <div class="small-note">
+              These presets auto-adjust price, starting users, growth, churn, and monthly costs.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Core inputs</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="price">Monthly price per user</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="price" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="startingUsers">Starting users</label>
+                <input id="startingUsers" class="input mono" type="number" min="0" value="25" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="newUsers">New users per month</label>
+                <input id="newUsers" class="input mono" type="number" min="0" value="20" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="churn">Monthly churn %</label>
+                <input id="churn" class="input mono" type="number" min="0" max="100" step="0.1" value="6" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="monthlyCosts">Monthly operating costs</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="monthlyCosts" type="text" value="1,200" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="cac">Customer acquisition cost (CAC)</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="cac" type="text" value="15" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="targetMRR">Target MRR</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="targetMRR" type="text" value="10,000" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="projectionMonths">Projection window</label>
+                <select id="projectionMonths" class="select" onchange="update()">
+                  <option value="6">6 months</option>
+                  <option value="12" selected>12 months</option>
+                  <option value="18">18 months</option>
+                  <option value="24">24 months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Model breakdown</span>
+              <button class="mini-btn" onclick="resetDefaults()">Reset</button>
+            </div>
+            <div class="table-card" style="box-shadow:none;border:none;background:transparent;">
+              <table class="pricing-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdownRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel" id="timeline">
+            <div class="panel-hdr">
+              <span class="panel-label">Growth timeline</span>
+            </div>
+            <div class="timeline-grid" id="timelineGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Revenue mix preview</span>
+            </div>
+            <div class="chart-wrap">
+              <div class="bar-track" id="revenueBar"></div>
+              <div class="chart-legend" id="revenueLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="big-card">
+            <div class="panel-label" style="margin-bottom:10px;">Result mode</div>
+            <div class="mode-row" id="modeRow"></div>
+
+            <div class="big-label" id="resultLabel">Current MRR</div>
+            <div class="big-val" id="headlineValue">$0</div>
+            <div class="big-sub" id="headlineSub"></div>
+          </div>
+
+          <div class="stat-grid" id="statGrid"></div>
+
+          <div id="biggestProblemBox"></div>
+          <div id="goalBox"></div>
+          <div id="profitabilityBox"></div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Break-even & milestones</span>
+            </div>
+            <div class="mini-grid" id="milestoneGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">User economics</span>
+            </div>
+            <div class="mini-grid" id="economicsGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Scenario comparison</span>
+            </div>
+            <div class="scenario-grid" id="scenarioGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="tips">
+      <div class="section-head">
+        <span class="section-title">SaaS reminders</span>
+      </div>
+
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="tip-num">01</div>
+          <div class="tip-title">Churn kills quietly</div>
+          <div class="tip-body">You can add users every month and still stall if churn keeps erasing your growth.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">02</div>
+          <div class="tip-title">Price is leverage</div>
+          <div class="tip-body">A small increase in price can move MRR faster than chasing the same number of extra users.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">03</div>
+          <div class="tip-title">LTV must beat CAC</div>
+          <div class="tip-body">If your customer is not worth much more than the cost to acquire them, scale gets dangerous fast.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">04</div>
+          <div class="tip-title">Costs matter early</div>
+          <div class="tip-body">A tiny product can still fail if infrastructure, tools, and paid growth outpace the revenue base.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>SaaS Growth Simulator · Built to test whether your product can really scale.</div>
+      <div style="margin-top:.5rem">See if your SaaS idea actually works before you build it.</div>
+    </footer>
+  </div>
+
+  <script>
+    function toggleTheme(){
+      const html = document.documentElement;
+      const dark = html.dataset.theme !== 'dark';
+      html.dataset.theme = dark ? 'dark' : 'light';
+      document.getElementById('themeBtn').textContent = dark ? 'Light mode' : 'Dark mode';
+      localStorage.setItem('kc-theme', html.dataset.theme);
+    }
+
+    (function(){
+      const saved = localStorage.getItem('kc-theme');
+      if(saved){
+        document.documentElement.dataset.theme = saved;
+        document.addEventListener('DOMContentLoaded', () => {
+          const btn = document.getElementById('themeBtn');
+          if(btn) btn.textContent = saved === 'dark' ? 'Light mode' : 'Dark mode';
+        });
+      }
+    })();
+
+    const PRESETS = [
+      {
+        id: 'micro',
+        icon: '🧩',
+        name: 'Micro SaaS',
+        desc: 'Lean solo tool',
+        price: 12,
+        startingUsers: 20,
+        newUsers: 10,
+        churn: 5,
+        costs: 350,
+        cac: 8
+      },
+      {
+        id: 'startup',
+        icon: '🚀',
+        name: 'Startup Push',
+        desc: 'Actively growing app',
+        price: 20,
+        startingUsers: 25,
+        newUsers: 20,
+        churn: 6,
+        costs: 1200,
+        cac: 15
+      },
+      {
+        id: 'b2b',
+        icon: '🏢',
+        name: 'B2B SaaS',
+        desc: 'Higher price, lower volume',
+        price: 79,
+        startingUsers: 10,
+        newUsers: 6,
+        churn: 3,
+        costs: 2500,
+        cac: 60
+      },
+      {
+        id: 'consumer',
+        icon: '📱',
+        name: 'Consumer App',
+        desc: 'Lower price, faster churn',
+        price: 9,
+        startingUsers: 100,
+        newUsers: 80,
+        churn: 9,
+        costs: 1800,
+        cac: 6
+      }
+    ];
+
+    const RESULT_MODES = [
+      { id: 'mrr', label: 'MRR' },
+      { id: 'users', label: 'Users' },
+      { id: 'breakeven', label: 'Break-even' },
+      { id: 'ltv', label: 'LTV' }
+    ];
+
+    let activePreset = PRESETS[1];
+    let activeMode = 'mrr';
+
+    function renderPresets(){
+      const grid = document.getElementById('presetGrid');
+      grid.innerHTML = PRESETS.map(p => `
+        <div class="preset-card${p.id === activePreset.id ? ' active' : ''}" onclick="pickPreset('${p.id}')">
+          <span class="pc-icon">${p.icon}</span>
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-desc">${p.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderModes(){
+      const row = document.getElementById('modeRow');
+      row.innerHTML = RESULT_MODES.map(m => `
+        <button class="mode-btn${m.id === activeMode ? ' active' : ''}" onclick="setMode('${m.id}')">${m.label}</button>
+      `).join('');
+    }
+
+    function setMode(id){
+      activeMode = id;
+      renderModes();
+      update();
+    }
+
+    function pickPreset(id){
+      activePreset = PRESETS.find(p => p.id === id) || PRESETS[1];
+      document.getElementById('price').value = activePreset.price.toLocaleString();
+      document.getElementById('priceTop').value = activePreset.price.toLocaleString();
+      document.getElementById('startingUsers').value = activePreset.startingUsers;
+      document.getElementById('newUsers').value = activePreset.newUsers;
+      document.getElementById('churn').value = activePreset.churn;
+      document.getElementById('monthlyCosts').value = activePreset.costs.toLocaleString();
+      document.getElementById('cac').value = activePreset.cac.toLocaleString();
+      renderPresets();
+      update();
+    }
+
+    function parseMoney(str){
+      return parseInt(String(str).replace(/[^0-9]/g,'')) || 0;
+    }
+
+    function formatMoneyInput(el){
+      const n = parseMoney(el.value);
+      el.value = n.toLocaleString();
+    }
+
+    function syncTopPrice(el){
+      const n = parseMoney(el.value);
+      document.getElementById('price').value = n.toLocaleString();
+      document.getElementById('priceTop').value = n.toLocaleString();
+      update();
+    }
+
+    function fmtMoney(n){
+      return '$' + Math.round(n).toLocaleString();
+    }
+
+    function fmtPct(n){
+      return (Math.round(n * 10) / 10) + '%';
+    }
+
+    function ceilSafe(n){
+      return Number.isFinite(n) ? Math.ceil(n) : Infinity;
+    }
+
+    function resetDefaults(){
+      activePreset = PRESETS[1];
+      activeMode = 'mrr';
+      renderPresets();
+      renderModes();
+      pickPreset(activePreset.id);
+      document.getElementById('targetMRR').value = '10,000';
+      document.getElementById('projectionMonths').value = '12';
+      update();
+    }
+
+    function simulateMonths(startingUsers, newUsers, churnRate, price, months, monthlyCosts){
+      let users = startingUsers;
+      const rows = [];
+
+      for(let month = 1; month <= months; month++){
+        const churned = users * churnRate;
+        const endingUsers = Math.max(0, users - churned + newUsers);
+        const mrr = endingUsers * price;
+        const profit = mrr - monthlyCosts;
+
+        rows.push({
+          month,
+          startUsers: users,
+          churned,
+          newUsers,
+          endUsers: endingUsers,
+          mrr,
+          profit
+        });
+
+        users = endingUsers;
+      }
+
+      return rows;
+    }
+
+    function firstMonthWhere(rows, fn){
+      const found = rows.find(fn);
+      return found ? found.month : null;
+    }
+
+    function update(){
+      const price = parseMoney(document.getElementById('price').value);
+      const startingUsers = +document.getElementById('startingUsers').value || 0;
+      const newUsers = +document.getElementById('newUsers').value || 0;
+      const churn = (+document.getElementById('churn').value || 0) / 100;
+      const monthlyCosts = parseMoney(document.getElementById('monthlyCosts').value);
+      const cac = parseMoney(document.getElementById('cac').value);
+      const targetMRR = parseMoney(document.getElementById('targetMRR').value);
+      const projectionMonths = +document.getElementById('projectionMonths').value || 12;
+
+      const currentMRR = startingUsers * price;
+      const currentProfit = currentMRR - monthlyCosts;
+      const churnedNow = startingUsers * churn;
+      const ltv = churn > 0 ? price / churn : Infinity;
+      const ltvLabel = Number.isFinite(ltv) ? fmtMoney(ltv) : '∞';
+      const ltvToCac = cac > 0 && Number.isFinite(ltv) ? (ltv / cac) : Infinity;
+      const ltvToCacLabel = Number.isFinite(ltvToCac) ? (Math.round(ltvToCac * 10) / 10) + 'x' : '∞';
+      const breakEvenUsers = price > 0 ? ceilSafe(monthlyCosts / price) : Infinity;
+      const breakEvenMRR = breakEvenUsers === Infinity ? Infinity : breakEvenUsers * price;
+
+      const rows = simulateMonths(startingUsers, newUsers, churn, price, projectionMonths, monthlyCosts);
+      const finalRow = rows[rows.length - 1] || { endUsers: startingUsers, mrr: currentMRR, profit: currentProfit };
+      const monthToBreakEven = firstMonthWhere(rows, r => r.mrr >= monthlyCosts);
+      const monthToTarget = firstMonthWhere(rows, r => r.mrr >= targetMRR);
+      const monthOne = rows[0] || finalRow;
+      const monthTwelve = rows[Math.min(11, rows.length - 1)] || finalRow;
+
+      let resultLabel = 'Current MRR';
+      let resultValue = fmtMoney(currentMRR);
+      let resultSub = `${startingUsers} users · ${fmtMoney(price)}/user · ${fmtMoney(currentProfit)} current monthly profit`;
+
+      if(activeMode === 'users'){
+        resultLabel = 'Projected users';
+        resultValue = Math.round(finalRow.endUsers).toLocaleString();
+        resultSub = `after ${projectionMonths} months · start ${startingUsers} · add ${newUsers}/month`;
+      } else if(activeMode === 'breakeven'){
+        resultLabel = 'Break-even users';
+        resultValue = breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString();
+        resultSub = `${breakEvenMRR === Infinity ? '∞' : fmtMoney(breakEvenMRR)} in MRR needed to cover monthly costs`;
+      } else if(activeMode === 'ltv'){
+        resultLabel = 'Lifetime value';
+        resultValue = ltvLabel;
+        resultSub = `LTV/CAC ${ltvToCacLabel} · churn ${fmtPct(churn * 100)} · price ${fmtMoney(price)}`;
+      }
+
+      document.getElementById('resultLabel').textContent = resultLabel;
+      document.getElementById('headlineValue').textContent = resultValue;
+      document.getElementById('headlineSub').textContent = resultSub;
+
+      document.getElementById('statGrid').innerHTML = [
+        {
+          l:'Current MRR',
+          v:fmtMoney(currentMRR),
+          s:'starting revenue',
+          c:'var(--accent)'
+        },
+        {
+          l:'Monthly profit',
+          v:fmtMoney(currentProfit),
+          s:'after monthly costs',
+          c: currentProfit >= 0 ? 'var(--green)' : 'var(--red)'
+        },
+        {
+          l:'Churned users now',
+          v:Math.round(churnedNow * 10) / 10,
+          s:'lost per month at current base',
+          c:'var(--amber)'
+        },
+        {
+          l:'LTV / CAC',
+          v:ltvToCacLabel,
+          s:'user economics health',
+          c: Number.isFinite(ltvToCac) && ltvToCac >= 3 ? 'var(--green)' : 'var(--amber)'
+        }
+      ].map(s => `
+        <div class="stat">
+          <div class="stat-l">${s.l}</div>
+          <div class="stat-v" style="color:${s.c}">${s.v}</div>
+          <div class="stat-s">${s.s}</div>
+        </div>
+      `).join('');
+
+      let biggestProblemHTML = '';
+      if(churn >= 0.08){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: churn is high. Even if you keep adding users, too much of your growth is leaking out every month.
+          </div>
+        `;
+      } else if(price <= 10 && monthlyCosts >= 1000){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: your price is probably too low for your cost base. You may need stronger pricing before chasing scale.
+          </div>
+        `;
+      } else if(newUsers <= churnedNow){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: you are not adding users fast enough to outgrow churn. Your growth engine is too weak right now.
+          </div>
+        `;
+      } else {
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest lever: your model is viable on paper. The next big gains likely come from reducing churn a little or raising price slightly.
+          </div>
+        `;
+      }
+      document.getElementById('biggestProblemBox').innerHTML = biggestProblemHTML;
+
+      let goalHTML = '';
+      if(monthToTarget){
+        goalHTML = `
+          <div class="info-box">
+            ${fmtMoney(targetMRR)} MRR target: reachable in month ${monthToTarget} at your current setup.
+          </div>
+        `;
+      } else {
+        goalHTML = `
+          <div class="warning-box">
+            ${fmtMoney(targetMRR)} MRR target: not reached within ${projectionMonths} months at your current setup.
+          </div>
+        `;
+      }
+      document.getElementById('goalBox').innerHTML = goalHTML;
+
+      let profitabilityHTML = '';
+      if(currentProfit >= 0){
+        profitabilityHTML = `
+          <div class="info-box">
+            You are already above break-even on the current numbers. Now the focus is protecting churn and improving LTV.
+          </div>
+        `;
+      } else if(monthToBreakEven){
+        profitabilityHTML = `
+          <div class="soft-box">
+            You are not profitable yet, but this model crosses break-even in month ${monthToBreakEven} if growth holds.
+          </div>
+        `;
+      } else {
+        profitabilityHTML = `
+          <div class="warning-box">
+            This setup does not break even within the current projection window. Either reduce costs, increase price, or grow faster.
+          </div>
+        `;
+      }
+      document.getElementById('profitabilityBox').innerHTML = profitabilityHTML;
+
+      document.getElementById('milestoneGrid').innerHTML = `
+        <div class="mini-card">
+          <div class="mini-k">Break-even users</div>
+          <div class="mini-v">${breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString()}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">Break-even month</div>
+          <div class="mini-v">${monthToBreakEven || '—'}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">${fmtMoney(1000)} MRR</div>
+          <div class="mini-v">${firstMonthWhere(rows, r => r.mrr >= 1000) || '—'}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">${fmtMoney(10000)} MRR</div>
+          <div class="mini-v">${firstMonthWhere(rows, r => r.mrr >= 10000) || '—'}</div>
+        </div>
+      `;
+
+      document.getElementById('economicsGrid').innerHTML = `
+        <div class="mini-card">
+          <div class="mini-k">LTV</div>
+          <div class="mini-v">${ltvLabel}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">CAC</div>
+          <div class="mini-v">${fmtMoney(cac)}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">LTV / CAC</div>
+          <div class="mini-v">${ltvToCacLabel}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">Final month MRR</div>
+          <div class="mini-v">${fmtMoney(finalRow.mrr)}</div>
+        </div>
+      `;
+
+      const priceUpMRR = finalRow.endUsers * Math.round(price * 1.2);
+      const lowerChurnRows = simulateMonths(startingUsers, newUsers, Math.max(0, churn - 0.02), price, projectionMonths, monthlyCosts);
+      const lowerChurnFinal = lowerChurnRows[lowerChurnRows.length - 1] || finalRow;
+
+      document.getElementById('scenarioGrid').innerHTML = [
+        {
+          name: 'Current setup',
+          price: finalRow.mrr,
+          desc: `Projected MRR after ${projectionMonths} months`
+        },
+        {
+          name: 'Raise price by 20%',
+          price: priceUpMRR,
+          desc: 'Same users, stronger monetization'
+        },
+        {
+          name: 'Reduce churn by 2%',
+          price: lowerChurnFinal.mrr,
+          desc: 'Same price, healthier retention'
+        }
+      ].map(s => `
+        <div class="scenario-card">
+          <div class="scenario-top">
+            <div class="scenario-name">${s.name}</div>
+            <div class="scenario-price">${fmtMoney(s.price)}</div>
+          </div>
+          <div class="scenario-desc">${s.desc}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('breakdownRows').innerHTML = [
+        ['Preset', activePreset.name],
+        ['Monthly price per user', fmtMoney(price)],
+        ['Starting users', startingUsers.toLocaleString()],
+        ['New users / month', newUsers.toLocaleString()],
+        ['Monthly churn', fmtPct(churn * 100)],
+        ['Monthly operating costs', fmtMoney(monthlyCosts)],
+        ['Current MRR', fmtMoney(currentMRR)],
+        ['Current monthly profit', fmtMoney(currentProfit)],
+        ['Break-even users', breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString()],
+        ['LTV', ltvLabel],
+        ['CAC', fmtMoney(cac)],
+        ['LTV / CAC', ltvToCacLabel]
+      ].map(row => `
+        <tr>
+          <td>${row[0]}</td>
+          <td class="mono">${row[1]}</td>
+        </tr>
+      `).join('');
+
+      const timelinePoints = [monthOne, monthTwelve, finalRow]
+        .filter((v, i, arr) => arr.findIndex(x => x.month === v.month) === i);
+
+      document.getElementById('timelineGrid').innerHTML = timelinePoints.map(r => `
+        <div class="timeline-card">
+          <div class="timeline-top">
+            <div class="timeline-name">Month ${r.month}</div>
+            <div class="timeline-price">${fmtMoney(r.mrr)}</div>
+          </div>
+          <div class="timeline-desc">
+            ${Math.round(r.endUsers).toLocaleString()} users · ${fmtMoney(r.profit)} monthly profit
+          </div>
+        </div>
+      `).join('');
+
+      const totalForBar = Math.max(1, monthlyCosts + Math.max(currentProfit, 0) + Math.max(price * startingUsers * churn, 0));
+      const costPct = (monthlyCosts / totalForBar) * 100;
+      const profitPct = (Math.max(currentProfit, 0) / totalForBar) * 100;
+      const churnValue = price * startingUsers * churn;
+      const churnPct = (Math.max(churnValue, 0) / totalForBar) * 100;
+
+      document.getElementById('revenueBar').innerHTML = `
+        <div class="bar-seg" style="width:${costPct}%;background:var(--red)">${costPct > 12 ? 'Costs' : ''}</div>
+        <div class="bar-seg" style="width:${churnPct}%;background:var(--amber)">${churnPct > 12 ? 'Churn drag' : ''}</div>
+        <div class="bar-seg" style="width:${profitPct}%;background:var(--green)">${profitPct > 12 ? 'Profit' : ''}</div>
+      `;
+
+      document.getElementById('revenueLegend').innerHTML = `
+        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Monthly costs — ${fmtMoney(monthlyCosts)}</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Revenue drag from churn — ${fmtMoney(churnValue)}</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Current profit — ${fmtMoney(Math.max(currentProfit,0))}</div>
+      `;
+    }
+
+    renderPresets();
+    renderModes();
+    pickPreset(activePreset.id);
+  </script>
+</body>
+</html>
