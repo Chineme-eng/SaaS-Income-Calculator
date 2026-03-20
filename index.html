@@ -117,7 +117,7 @@
 
     .nav-link:hover { color: var(--accent); }
 
-    .theme-btn, .mini-btn, .mode-btn {
+    .theme-btn, .mini-btn, .mode-btn, .period-btn {
       font-family: var(--mono);
       font-size: 11px;
       padding: 6px 10px;
@@ -131,12 +131,14 @@
 
     .theme-btn:hover,
     .mini-btn:hover,
-    .mode-btn:hover {
+    .mode-btn:hover,
+    .period-btn:hover {
       border-color: var(--accent);
       color: var(--accent);
     }
 
-    .mode-btn.active {
+    .mode-btn.active,
+    .period-btn.active {
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
@@ -351,6 +353,12 @@
       line-height: 1.4;
     }
 
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -376,8 +384,7 @@
     }
 
     .input,
-    .select,
-    .textarea {
+    .select {
       width: 100%;
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -391,15 +398,8 @@
     }
 
     .input:focus,
-    .select:focus,
-    .textarea:focus {
+    .select:focus {
       border-color: var(--accent);
-    }
-
-    .textarea {
-      min-height: 160px;
-      resize: vertical;
-      line-height: 1.6;
     }
 
     .mono { font-family: var(--mono); }
@@ -793,7 +793,7 @@
     }
 
     @media print {
-      nav, .theme-btn, .mini-btn, .mode-row { display:none !important; }
+      nav, .theme-btn, .mini-btn, .mode-row, .toggle-row { display:none !important; }
       body { background:#fff; color:#000; }
       .wrap { max-width:none; padding:0; }
       .results { position:static; }
@@ -825,11 +825,12 @@
         or if it breaks before it gets there.
       </p>
       <div class="hero-bar">
-        <span class="hero-bar-label">Monthly price per user</span>
+        <span class="hero-bar-label">Billing price</span>
         <div class="money-input-wrap">
           <span class="money-prefix">$</span>
           <input id="priceTop" class="money-input" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
         </div>
+        <div class="toggle-row" id="billingPeriodRow"></div>
       </div>
     </header>
 
@@ -847,7 +848,7 @@
             </div>
             <div class="preset-grid" id="presetGrid"></div>
             <div class="small-note">
-              These presets auto-adjust price, starting users, growth, churn, and monthly costs.
+              These presets auto-adjust billing period, price, starting users, growth, churn, and monthly costs.
             </div>
           </div>
 
@@ -858,11 +859,16 @@
 
             <div class="form-grid">
               <div class="field">
-                <label for="price">Monthly price per user</label>
+                <label for="price">Billing price</label>
                 <div class="inline-money">
                   <span>$</span>
                   <input id="price" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
                 </div>
+              </div>
+
+              <div class="field">
+                <label>Billing period</label>
+                <div class="toggle-row" id="billingPeriodRowBottom"></div>
               </div>
 
               <div class="field">
@@ -914,6 +920,8 @@
                 </select>
               </div>
             </div>
+
+            <div class="small-note" id="billingNote"></div>
           </div>
 
           <div class="panel">
@@ -967,6 +975,7 @@
           <div id="biggestProblemBox"></div>
           <div id="goalBox"></div>
           <div id="profitabilityBox"></div>
+          <div id="billingInsightBox"></div>
 
           <div class="panel">
             <div class="panel-hdr">
@@ -1055,6 +1064,7 @@
         icon: '🧩',
         name: 'Micro SaaS',
         desc: 'Lean solo tool',
+        billingPeriod: 'month',
         price: 12,
         startingUsers: 20,
         newUsers: 10,
@@ -1067,6 +1077,7 @@
         icon: '🚀',
         name: 'Startup Push',
         desc: 'Actively growing app',
+        billingPeriod: 'month',
         price: 20,
         startingUsers: 25,
         newUsers: 20,
@@ -1079,6 +1090,7 @@
         icon: '🏢',
         name: 'B2B SaaS',
         desc: 'Higher price, lower volume',
+        billingPeriod: 'month',
         price: 79,
         startingUsers: 10,
         newUsers: 6,
@@ -1091,12 +1103,52 @@
         icon: '📱',
         name: 'Consumer App',
         desc: 'Lower price, faster churn',
+        billingPeriod: 'month',
         price: 9,
         startingUsers: 100,
         newUsers: 80,
         churn: 9,
         costs: 1800,
         cac: 6
+      },
+      {
+        id: 'weekly-tool',
+        icon: '⏱️',
+        name: 'Weekly Tool',
+        desc: 'Low-ticket fast recurring',
+        billingPeriod: 'week',
+        price: 5,
+        startingUsers: 80,
+        newUsers: 35,
+        churn: 11,
+        costs: 700,
+        cac: 5
+      },
+      {
+        id: 'annual-b2b',
+        icon: '📦',
+        name: 'Annual B2B',
+        desc: 'Yearly contracts, lower churn',
+        billingPeriod: 'year',
+        price: 600,
+        startingUsers: 12,
+        newUsers: 4,
+        churn: 1.5,
+        costs: 3200,
+        cac: 120
+      },
+      {
+        id: 'ai-tool',
+        icon: '🤖',
+        name: 'AI Tool',
+        desc: 'Higher infra, strong pricing',
+        billingPeriod: 'month',
+        price: 29,
+        startingUsers: 35,
+        newUsers: 30,
+        churn: 7,
+        costs: 2600,
+        cac: 22
       }
     ];
 
@@ -1107,8 +1159,15 @@
       { id: 'ltv', label: 'LTV' }
     ];
 
+    const BILLING_PERIODS = [
+      { id: 'week', label: 'Week', toMonthly: 4.3333333333 },
+      { id: 'month', label: 'Month', toMonthly: 1 },
+      { id: 'year', label: 'Year', toMonthly: 1/12 }
+    ];
+
     let activePreset = PRESETS[1];
     let activeMode = 'mrr';
+    let activeBillingPeriod = 'month';
 
     function renderPresets(){
       const grid = document.getElementById('presetGrid');
@@ -1128,14 +1187,29 @@
       `).join('');
     }
 
+    function renderBillingPeriods(){
+      const btns = BILLING_PERIODS.map(p => `
+        <button class="period-btn${p.id === activeBillingPeriod ? ' active' : ''}" onclick="setBillingPeriod('${p.id}')">${p.label}</button>
+      `).join('');
+      document.getElementById('billingPeriodRow').innerHTML = btns;
+      document.getElementById('billingPeriodRowBottom').innerHTML = btns;
+    }
+
     function setMode(id){
       activeMode = id;
       renderModes();
       update();
     }
 
+    function setBillingPeriod(id){
+      activeBillingPeriod = id;
+      renderBillingPeriods();
+      update();
+    }
+
     function pickPreset(id){
       activePreset = PRESETS.find(p => p.id === id) || PRESETS[1];
+      activeBillingPeriod = activePreset.billingPeriod;
       document.getElementById('price').value = activePreset.price.toLocaleString();
       document.getElementById('priceTop').value = activePreset.price.toLocaleString();
       document.getElementById('startingUsers').value = activePreset.startingUsers;
@@ -1144,6 +1218,7 @@
       document.getElementById('monthlyCosts').value = activePreset.costs.toLocaleString();
       document.getElementById('cac').value = activePreset.cac.toLocaleString();
       renderPresets();
+      renderBillingPeriods();
       update();
     }
 
@@ -1175,6 +1250,14 @@
       return Number.isFinite(n) ? Math.ceil(n) : Infinity;
     }
 
+    function getBillingMeta(){
+      return BILLING_PERIODS.find(p => p.id === activeBillingPeriod) || BILLING_PERIODS[1];
+    }
+
+    function getMonthlyEquivalent(price){
+      return price * getBillingMeta().toMonthly;
+    }
+
     function resetDefaults(){
       activePreset = PRESETS[1];
       activeMode = 'mrr';
@@ -1186,14 +1269,14 @@
       update();
     }
 
-    function simulateMonths(startingUsers, newUsers, churnRate, price, months, monthlyCosts){
+    function simulateMonths(startingUsers, newUsers, churnRate, monthlyEquivalentPrice, months, monthlyCosts){
       let users = startingUsers;
       const rows = [];
 
       for(let month = 1; month <= months; month++){
         const churned = users * churnRate;
         const endingUsers = Math.max(0, users - churned + newUsers);
-        const mrr = endingUsers * price;
+        const mrr = endingUsers * monthlyEquivalentPrice;
         const profit = mrr - monthlyCosts;
 
         rows.push({
@@ -1226,18 +1309,20 @@
       const cac = parseMoney(document.getElementById('cac').value);
       const targetMRR = parseMoney(document.getElementById('targetMRR').value);
       const projectionMonths = +document.getElementById('projectionMonths').value || 12;
+      const billingMeta = getBillingMeta();
 
-      const currentMRR = startingUsers * price;
+      const monthlyEquivalentPrice = getMonthlyEquivalent(price);
+      const currentMRR = startingUsers * monthlyEquivalentPrice;
       const currentProfit = currentMRR - monthlyCosts;
       const churnedNow = startingUsers * churn;
-      const ltv = churn > 0 ? price / churn : Infinity;
+      const ltv = churn > 0 ? monthlyEquivalentPrice / churn : Infinity;
       const ltvLabel = Number.isFinite(ltv) ? fmtMoney(ltv) : '∞';
       const ltvToCac = cac > 0 && Number.isFinite(ltv) ? (ltv / cac) : Infinity;
       const ltvToCacLabel = Number.isFinite(ltvToCac) ? (Math.round(ltvToCac * 10) / 10) + 'x' : '∞';
-      const breakEvenUsers = price > 0 ? ceilSafe(monthlyCosts / price) : Infinity;
-      const breakEvenMRR = breakEvenUsers === Infinity ? Infinity : breakEvenUsers * price;
+      const breakEvenUsers = monthlyEquivalentPrice > 0 ? ceilSafe(monthlyCosts / monthlyEquivalentPrice) : Infinity;
+      const breakEvenMRR = breakEvenUsers === Infinity ? Infinity : breakEvenUsers * monthlyEquivalentPrice;
 
-      const rows = simulateMonths(startingUsers, newUsers, churn, price, projectionMonths, monthlyCosts);
+      const rows = simulateMonths(startingUsers, newUsers, churn, monthlyEquivalentPrice, projectionMonths, monthlyCosts);
       const finalRow = rows[rows.length - 1] || { endUsers: startingUsers, mrr: currentMRR, profit: currentProfit };
       const monthToBreakEven = firstMonthWhere(rows, r => r.mrr >= monthlyCosts);
       const monthToTarget = firstMonthWhere(rows, r => r.mrr >= targetMRR);
@@ -1246,7 +1331,7 @@
 
       let resultLabel = 'Current MRR';
       let resultValue = fmtMoney(currentMRR);
-      let resultSub = `${startingUsers} users · ${fmtMoney(price)}/user · ${fmtMoney(currentProfit)} current monthly profit`;
+      let resultSub = `${startingUsers} users · ${fmtMoney(price)}/${activeBillingPeriod} · ${fmtMoney(currentProfit)} monthly profit`;
 
       if(activeMode === 'users'){
         resultLabel = 'Projected users';
@@ -1255,22 +1340,25 @@
       } else if(activeMode === 'breakeven'){
         resultLabel = 'Break-even users';
         resultValue = breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString();
-        resultSub = `${breakEvenMRR === Infinity ? '∞' : fmtMoney(breakEvenMRR)} in MRR needed to cover monthly costs`;
+        resultSub = `${breakEvenMRR === Infinity ? '∞' : fmtMoney(breakEvenMRR)} in monthly revenue needed to cover monthly costs`;
       } else if(activeMode === 'ltv'){
         resultLabel = 'Lifetime value';
         resultValue = ltvLabel;
-        resultSub = `LTV/CAC ${ltvToCacLabel} · churn ${fmtPct(churn * 100)} · price ${fmtMoney(price)}`;
+        resultSub = `LTV/CAC ${ltvToCacLabel} · churn ${fmtPct(churn * 100)} · normalized to monthly`;
       }
 
       document.getElementById('resultLabel').textContent = resultLabel;
       document.getElementById('headlineValue').textContent = resultValue;
       document.getElementById('headlineSub').textContent = resultSub;
 
+      document.getElementById('billingNote').textContent =
+        `Selected billing period: ${activeBillingPeriod}. For comparisons, projections, LTV, MRR, and break-even are normalized to monthly revenue. ${fmtMoney(price)}/${activeBillingPeriod} is treated as ${fmtMoney(monthlyEquivalentPrice)}/month equivalent.`;
+
       document.getElementById('statGrid').innerHTML = [
         {
           l:'Current MRR',
           v:fmtMoney(currentMRR),
-          s:'starting revenue',
+          s:'monthly normalized revenue',
           c:'var(--accent)'
         },
         {
@@ -1306,10 +1394,10 @@
             Biggest problem: churn is high. Even if you keep adding users, too much of your growth is leaking out every month.
           </div>
         `;
-      } else if(price <= 10 && monthlyCosts >= 1000){
+      } else if(monthlyEquivalentPrice <= 10 && monthlyCosts >= 1000){
         biggestProblemHTML = `
           <div class="blue-box">
-            Biggest problem: your price is probably too low for your cost base. You may need stronger pricing before chasing scale.
+            Biggest problem: your effective monthly price is probably too low for your cost base. You may need stronger pricing before chasing scale.
           </div>
         `;
       } else if(newUsers <= churnedNow){
@@ -1359,11 +1447,33 @@
       } else {
         profitabilityHTML = `
           <div class="warning-box">
-            This setup does not break even within the current projection window. Either reduce costs, increase price, or grow faster.
+            This setup does not break even within the current projection window. Either reduce costs, increase effective price, or grow faster.
           </div>
         `;
       }
       document.getElementById('profitabilityBox').innerHTML = profitabilityHTML;
+
+      let billingInsightHTML = '';
+      if(activeBillingPeriod === 'week'){
+        billingInsightHTML = `
+          <div class="soft-box">
+            Weekly billing can boost short-term cash flow, but it often comes with higher churn sensitivity and more billing fatigue.
+          </div>
+        `;
+      } else if(activeBillingPeriod === 'year'){
+        billingInsightHTML = `
+          <div class="info-box">
+            Yearly billing can dramatically improve upfront cash collection and retention, but it usually requires stronger trust and higher acquisition effort.
+          </div>
+        `;
+      } else {
+        billingInsightHTML = `
+          <div class="soft-box">
+            Monthly billing is the cleanest default for modeling recurring SaaS revenue. It is usually the easiest to compare against costs and churn.
+          </div>
+        `;
+      }
+      document.getElementById('billingInsightBox').innerHTML = billingInsightHTML;
 
       document.getElementById('milestoneGrid').innerHTML = `
         <div class="mini-card">
@@ -1403,8 +1513,8 @@
         </div>
       `;
 
-      const priceUpMRR = finalRow.endUsers * Math.round(price * 1.2);
-      const lowerChurnRows = simulateMonths(startingUsers, newUsers, Math.max(0, churn - 0.02), price, projectionMonths, monthlyCosts);
+      const priceUpMRR = finalRow.endUsers * Math.round(monthlyEquivalentPrice * 1.2);
+      const lowerChurnRows = simulateMonths(startingUsers, newUsers, Math.max(0, churn - 0.02), monthlyEquivalentPrice, projectionMonths, monthlyCosts);
       const lowerChurnFinal = lowerChurnRows[lowerChurnRows.length - 1] || finalRow;
 
       document.getElementById('scenarioGrid').innerHTML = [
@@ -1414,7 +1524,7 @@
           desc: `Projected MRR after ${projectionMonths} months`
         },
         {
-          name: 'Raise price by 20%',
+          name: 'Raise effective price by 20%',
           price: priceUpMRR,
           desc: 'Same users, stronger monetization'
         },
@@ -1435,7 +1545,9 @@
 
       document.getElementById('breakdownRows').innerHTML = [
         ['Preset', activePreset.name],
-        ['Monthly price per user', fmtMoney(price)],
+        ['Billing period', activeBillingPeriod],
+        ['Billing price', `${fmtMoney(price)} / ${activeBillingPeriod}`],
+        ['Monthly equivalent price', fmtMoney(monthlyEquivalentPrice)],
         ['Starting users', startingUsers.toLocaleString()],
         ['New users / month', newUsers.toLocaleString()],
         ['Monthly churn', fmtPct(churn * 100)],
@@ -1468,10 +1580,10 @@
         </div>
       `).join('');
 
-      const totalForBar = Math.max(1, monthlyCosts + Math.max(currentProfit, 0) + Math.max(price * startingUsers * churn, 0));
+      const totalForBar = Math.max(1, monthlyCosts + Math.max(currentProfit, 0) + Math.max(monthlyEquivalentPrice * startingUsers * churn, 0));
       const costPct = (monthlyCosts / totalForBar) * 100;
       const profitPct = (Math.max(currentProfit, 0) / totalForBar) * 100;
-      const churnValue = price * startingUsers * churn;
+      const churnValue = monthlyEquivalentPrice * startingUsers * churn;
       const churnPct = (Math.max(churnValue, 0) / totalForBar) * 100;
 
       document.getElementById('revenueBar').innerHTML = `
@@ -1489,6 +1601,7 @@
 
     renderPresets();
     renderModes();
+    renderBillingPeriods();
     pickPreset(activePreset.id);
   </script>
 </body>
