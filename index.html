@@ -1252,100 +1252,100 @@
     .growth-lab-shell{
       position:relative;
       background:
-        radial-gradient(circle at top left, rgba(184,92,42,.10), transparent 36%),
+        radial-gradient(circle at top left, rgba(184,92,42,.09), transparent 34%),
         linear-gradient(180deg,var(--surface),var(--bg2));
       border:1px solid var(--border);
-      border-radius:24px;
-      padding:26px;
-      box-shadow:0 12px 36px rgba(26,22,18,.08);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:0 8px 24px rgba(26,22,18,.07);
       overflow:hidden;
     }
     .growth-lab-shell::before{
       content:'';
       position:absolute;
       inset:0;
-      background:linear-gradient(135deg, rgba(184,92,42,.05), transparent 42%);
+      background:linear-gradient(135deg, rgba(184,92,42,.045), transparent 38%);
       pointer-events:none;
     }
     .growth-lab-intro{
       display:grid;
-      grid-template-columns:minmax(0,1fr) 260px;
-      gap:18px;
+      grid-template-columns:minmax(0,1fr) 220px;
+      gap:12px;
       align-items:stretch;
-      margin-bottom:20px;
+      margin-bottom:14px;
       position:relative;
       z-index:1;
     }
     .growth-lab-copy{
-      background:rgba(255,255,255,.46);
+      background:rgba(255,255,255,.42);
       border:1px solid var(--border);
-      border-radius:20px;
-      padding:20px 22px;
-      backdrop-filter:blur(6px);
+      border-radius:16px;
+      padding:15px 17px;
+      backdrop-filter:blur(5px);
     }
-    [data-theme="dark"] .growth-lab-copy{background:rgba(36,31,25,.48)}
+    [data-theme="dark"] .growth-lab-copy{background:rgba(36,31,25,.46)}
     .growth-lab-kicker{
       font-family:var(--mono);
-      font-size:10px;
-      letter-spacing:.16em;
+      font-size:9px;
+      letter-spacing:.14em;
       text-transform:uppercase;
       color:var(--accent);
-      margin-bottom:10px;
+      margin-bottom:7px;
     }
     .growth-lab-copy h3{
       font-family:var(--serif);
-      font-size:34px;
-      line-height:1.02;
+      font-size:26px;
+      line-height:1.03;
       font-weight:400;
-      margin-bottom:10px;
+      margin-bottom:7px;
     }
     .growth-lab-copy p{
       font-family:var(--mono);
-      font-size:11px;
-      line-height:1.9;
+      font-size:10px;
+      line-height:1.75;
       color:var(--muted);
-      max-width:560px;
+      max-width:520px;
     }
     .growth-lab-side{
       background:var(--surface);
       border:1px solid var(--border);
-      border-radius:20px;
-      padding:18px;
+      border-radius:16px;
+      padding:14px;
       box-shadow:var(--shadow);
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
     }
     .growth-side-label{
       font-family:var(--mono);
-      font-size:10px;
+      font-size:9px;
       letter-spacing:.12em;
       text-transform:uppercase;
       color:var(--muted);
     }
     .growth-side-price{
       font-family:var(--serif);
-      font-size:40px;
+      font-size:32px;
       line-height:1;
       color:var(--accent);
     }
     .growth-side-note{
       font-family:var(--mono);
-      font-size:10px;
-      line-height:1.8;
+      font-size:9px;
+      line-height:1.7;
       color:var(--muted);
     }
     .growth-side-tags{
       display:flex;
       flex-wrap:wrap;
-      gap:6px;
+      gap:5px;
     }
     .growth-side-tags span{
       font-family:var(--mono);
-      font-size:9px;
+      font-size:8px;
       letter-spacing:.08em;
       text-transform:uppercase;
-      padding:4px 8px;
+      padding:4px 7px;
       border-radius:999px;
       border:1px solid var(--border);
       background:var(--bg2);
@@ -1354,67 +1354,88 @@
     .growth-tabs-wrap{
       position:relative;
       z-index:1;
-      padding:18px;
+      padding:14px;
       border:1px solid var(--border);
-      border-radius:20px;
-      background:rgba(255,255,255,.38);
-      backdrop-filter:blur(6px);
+      border-radius:16px;
+      background:rgba(255,255,255,.34);
+      backdrop-filter:blur(5px);
     }
-    [data-theme="dark"] .growth-tabs-wrap{background:rgba(36,31,25,.42)}
+    [data-theme="dark"] .growth-tabs-wrap{background:rgba(36,31,25,.40)}
+    .growth-lab-shell .pro-lock-wrap{position:relative}
+    .growth-lab-shell .pro-blur-inner{
+      max-height:560px;
+      overflow:hidden;
+    }
+    .growth-lab-shell .pro-lock-wrap::after{
+      content:'';
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:110px;
+      background:linear-gradient(to bottom, rgba(250,247,242,0), var(--bg2) 80%);
+      pointer-events:none;
+      z-index:2;
+    }
+    [data-theme="dark"] .growth-lab-shell .pro-lock-wrap::after{
+      background:linear-gradient(to bottom, rgba(16,14,11,0), var(--bg2) 80%);
+    }
     .gl-overlay-card{
       background:var(--surface);
       border:1px solid var(--border2);
-      border-radius:22px;
-      padding:30px 32px;
-      max-width:500px;
+      border-radius:18px;
+      padding:22px 24px;
+      max-width:430px;
       width:100%;
-      box-shadow:0 16px 44px rgba(26,22,18,.16);
+      box-shadow:0 12px 32px rgba(26,22,18,.14);
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:14px;
+      gap:11px;
       text-align:center;
     }
     .gl-overlay-topline{
       font-family:var(--mono);
-      font-size:9px;
-      letter-spacing:.16em;
+      font-size:8px;
+      letter-spacing:.14em;
       text-transform:uppercase;
       background:var(--accent);
       color:#fff;
-      padding:4px 12px;
+      padding:4px 10px;
       border-radius:999px;
     }
     .gl-overlay-card h3{
       font-family:var(--serif);
-      font-size:30px;
-      line-height:1.05;
+      font-size:24px;
+      line-height:1.06;
       font-weight:400;
       color:var(--text);
     }
     .gl-overlay-card p{
       font-family:var(--mono);
-      font-size:11px;
-      line-height:1.9;
+      font-size:10px;
+      line-height:1.8;
       color:var(--muted);
-      max-width:380px;
+      max-width:340px;
     }
     .gl-secure-note{
       font-family:var(--mono);
-      font-size:10px;
+      font-size:9px;
       color:var(--faint);
       letter-spacing:.03em;
     }
     @media(max-width:960px){
       .growth-lab-intro{grid-template-columns:1fr}
+      .growth-lab-shell .pro-blur-inner{max-height:500px}
     }
     @media(max-width:640px){
       .pro-mini-preview{grid-template-columns:1fr}
-      .growth-lab-shell{padding:18px}
-      .growth-tabs-wrap{padding:14px}
-      .gl-overlay-card{padding:22px 20px}
-      .gl-overlay-card h3{font-size:26px}
-      .growth-lab-copy h3{font-size:28px}
+      .growth-lab-shell{padding:14px}
+      .growth-tabs-wrap{padding:12px}
+      .growth-lab-shell .pro-blur-inner{max-height:430px}
+      .gl-overlay-card{padding:18px 16px}
+      .gl-overlay-card h3{font-size:22px}
+      .growth-lab-copy h3{font-size:22px}
       .pro-teaser-row{align-items:flex-start;flex-direction:column}
     }
 
@@ -1695,12 +1716,12 @@
           <div class="growth-lab-copy">
             <div class="growth-lab-kicker">Founder-level planning</div>
             <h3>Pressure-test the model<br><em>before growth gets expensive.</em></h3>
-            <p>Growth Lab takes the nice-looking headline numbers and pushes them harder. Check how churn reshapes revenue, compare upside versus downside, and spot weak assumptions before you spend more on acquisition.</p>
+            <p>Stress-test churn, compare scenarios, and catch weak assumptions before growth spend gets bigger.</p>
           </div>
           <div class="growth-lab-side">
             <div class="growth-side-label">One-time unlock</div>
             <div class="growth-side-price">$35</div>
-            <div class="growth-side-note">Lifetime access to the premium planning layer for this tool.</div>
+            <div class="growth-side-note">Lifetime access to the compact premium planning layer.</div>
             <div class="growth-side-tags"><span>Scenario Builder</span><span>Sensitivity Grid</span><span>Cohorts</span><span>CAC Payback</span></div>
           </div>
         </div>
