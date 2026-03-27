@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaaS Growth Simulator</title>
+  <link rel="icon" type="image/png" href="KP.png">
+  <link href="https://fonts.googleapis.com/css2?family=Georgia&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root {
+      --bg:       #faf7f2;
+      --bg2:      #f3efe8;
+      --bg3:      #ede8df;
+      --surface:  #ffffff;
+      --border:   #ddd8ce;
+      --border2:  #c8c2b6;
+      --text:     #1a1612;
+      --muted:    #7a7268;
+      --faint:    #b8b2a8;
+      --accent:   #b85c2a;
+      --accent2:  #9a4a20;
+      --accent-bg:#fdf0e8;
+      --green:    #2e7d52;
+      --green-bg: #eaf4ee;
+      --red:      #b83232;
+      --red-bg:   #fdeaea;
+      --amber:    #a06010;
+      --amber-bg: #fef6e4;
+      --blue:     #466b94;
+      --blue-bg:  #edf3fa;
+      --serif:    'EB Garamond', Georgia, serif;
+      --mono:     'IBM Plex Mono', monospace;
+      --r:        8px;
+      --r2:       12px;
+      --shadow:   0 1px 4px rgba(26,22,18,0.07);
+      --shadow2:  0 2px 12px rgba(26,22,18,0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg:       #100e0b;
+      --bg2:      #181510;
+      --bg3:      #201d18;
+      --surface:  #241f19;
+      --border:   #332d25;
+      --border2:  #4a4238;
+      --text:     #ede6da;
+      --muted:    #8a8070;
+      --faint:    #4a4238;
+      --accent:   #d4784a;
+      --accent2:  #e8905c;
+      --accent-bg:#2a1e14;
+      --green:    #3aaa6a;
+      --green-bg: #0e2018;
+      --red:      #d45050;
+      --red-bg:   #220e0e;
+      --amber:    #c88030;
+      --amber-bg: #201608;
+      --blue:     #6d96c7;
+      --blue-bg:  #12202f;
+      --shadow:   0 1px 4px rgba(0,0,0,0.3);
+      --shadow2:  0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+      transition: background .3s, color .3s;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav-brand span { color: var(--accent); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+
+    .theme-btn, .mini-btn, .mode-btn, .period-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .theme-btn:hover,
+    .mini-btn:hover,
+    .mode-btn:hover,
+    .period-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .mode-btn.active,
+    .period-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    .hero {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 3.5rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -.01em;
+      margin-bottom: 1rem;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 640px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-bar-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .money-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+
+    .money-prefix {
+      font-family: var(--mono);
+      font-size: 18px;
+      padding: 8px 12px;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .money-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      padding: 8px 12px;
+      width: 140px;
+      text-align: right;
+    }
+
+    .section-head {
+      margin-bottom: 1.25rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .section-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 430px;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 3rem;
+    }
+
+    @media(max-width:960px){
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel + .panel { margin-top: 16px; }
+
+    .panel-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
+    }
+
+    .preset-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .preset-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+
+    .preset-card.active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      box-shadow: var(--shadow2);
+    }
+
+    .pc-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .pc-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .pc-desc {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      line-height: 1.4;
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media(max-width:640px){
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-family: var(--serif);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .input:focus,
+    .select:focus {
+      border-color: var(--accent);
+    }
+
+    .mono { font-family: var(--mono); }
+
+    .inline-money {
+      display: flex;
+      align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .inline-money span {
+      padding: 11px 12px;
+      font-family: var(--mono);
+      color: var(--muted);
+      background: var(--bg3);
+      border-right: 1px solid var(--border);
+    }
+
+    .inline-money input {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      padding: 11px 12px;
+      width: 100%;
+    }
+
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: sticky;
+      top: 72px;
+    }
+
+    @media(max-width:960px){
+      .results { position: static; }
+    }
+
+    .big-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .big-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent);
+    }
+
+    .big-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .big-val {
+      font-family: var(--serif);
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: -.02em;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    .big-sub {
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-l {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .stat-v {
+      font-family: var(--mono);
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    .stat-s {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .warning-box,
+    .info-box,
+    .soft-box,
+    .blue-box {
+      border-radius: var(--r);
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      border-left: 3px solid;
+    }
+
+    .warning-box {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .info-box {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .soft-box {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .blue-box {
+      background: var(--blue-bg);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mini-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .mini-k {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .mini-v {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .pricing-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pricing-table th {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .pricing-table td {
+      font-size: 14px;
+    }
+
+    .timeline-grid,
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .timeline-card,
+    .scenario-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .timeline-top,
+    .scenario-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-name,
+    .scenario-name {
+      font-family: var(--serif);
+      font-size: 18px;
+    }
+
+    .timeline-price,
+    .scenario-price {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .timeline-desc,
+    .scenario-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+
+    .chart-wrap {
+      padding-top: 4px;
+    }
+
+    .bar-track {
+      height: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .bar-seg {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: width .35s ease;
+      color: #fff;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .teaser-box{
+  margin-top: 0;
+  padding: 18px;
+  background: linear-gradient(180deg,var(--surface),var(--bg2));
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.teaser-box h3{
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+
+.teaser-box p{
+  color: var(--muted);
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.action-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+  .unlock-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.unlock-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}  
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 3rem 0;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .tip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .tip-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .tip-title {
+      font-family: var(--serif);
+      font-size: 15px;
+      font-weight: 400;
+      margin-bottom: 6px;
+    }
+
+    .tip-body {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--serif);
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .04em;
+      line-height: 2;
+    }
+
+    .small-note {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    @media print {
+      nav, .theme-btn, .mini-btn, .mode-row, .toggle-row { display:none !important; }
+      body { background:#fff; color:#000; }
+      .wrap { max-width:none; padding:0; }
+      .results { position:static; }
+      .panel, .big-card, .stat, .timeline-card, .scenario-card, .tip-card, .mini-card {
+        box-shadow:none;
+      }
+      .divider { margin: 1.5rem 0; }
+    }
+
+    /* ── PRO BADGE ── */
+    .pro-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 20px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── CHART (Pro) ── */
+    .chart-container { position: relative; height: 260px; width: 100%; }
+
+    /* ── PRO LOCK WRAPPER ── */
+    .pro-lock-wrap {
+      position: relative;
+      border-radius: var(--r2);
+      overflow: hidden;
+    }
+    .pro-blur-inner {
+      filter: blur(3px);
+      pointer-events: none;
+      user-select: none;
+      opacity: .85;
+    }
+    .pro-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, rgba(250,247,242,0.55) 0%, rgba(243,239,232,0.7) 100%);
+      backdrop-filter: blur(0px);
+      gap: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      z-index: 10;
+    }
+    [data-theme="dark"] .pro-overlay {
+      background: linear-gradient(160deg, rgba(16,14,11,0.55) 0%, rgba(24,21,16,0.7) 100%);
+    }
+    .pro-overlay-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .pro-overlay-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .pro-overlay-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .pro-overlay-desc {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 340px;
+    }
+    .pro-overlay-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .pro-overlay-btn:hover {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+    .pro-overlay-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-width: 380px;
+    }
+    .pro-feat-chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 3px 10px;
+    }
+
+    /* ── STRIPE MODAL ── */
+    .stripe-modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,22,18,.55);
+      backdrop-filter: blur(4px);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    .stripe-modal-bg.open { display: flex; }
+    .stripe-modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      width: 100%;
+      max-width: 480px;
+      margin: 1rem;
+      box-shadow: 0 8px 40px rgba(26,22,18,.18);
+      overflow: hidden;
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+    .stripe-modal-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stripe-modal-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+    }
+    .stripe-modal-close {
+      font-family: var(--mono);
+      font-size: 18px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color .15s;
+    }
+    .stripe-modal-close:hover { color: var(--text); }
+    .stripe-modal-body { padding: 24px; }
+    .stripe-price-display {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: var(--accent-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .stripe-price-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .stripe-price-amount {
+      font-family: var(--serif);
+      font-size: 48px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stripe-price-period {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .stripe-features-list {
+      list-style: none;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stripe-features-list li {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stripe-features-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .stripe-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .stripe-field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stripe-input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .stripe-input:focus { border-color: var(--accent); }
+    #stripe-card-element {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 13px 14px;
+      transition: border-color .15s;
+    }
+    #stripe-card-element.StripeElement--focus { border-color: var(--accent); }
+    .stripe-pay-btn {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 6px;
+    }
+    .stripe-pay-btn:hover { background: var(--accent2); }
+    .stripe-pay-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .stripe-error {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 10px;
+      min-height: 18px;
+    }
+    .stripe-secure {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--faint);
+      text-align: center;
+      margin-top: 14px;
+      letter-spacing: .04em;
+    }
+
+    /* ── NAV UPGRADE BUTTON ── */
+    .upgrade-nav-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .upgrade-nav-btn:hover { background: var(--accent); color: #fff; }
+
+    /* Tab bar styles for Growth Lab preview */
+    .tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;gap:0}
+    .tab-btn{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:10px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;margin-bottom:-1px;white-space:nowrap}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .sb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .sb-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+    .sb-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+    .sb-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+    .sb-field label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .sb-field input{font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);outline:none;width:100%}
+    .sb-result{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .sb-mrr{font-family:var(--mono);font-size:22px}
+    .sb-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+    .sens-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+    .sens-table th{padding:8px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-weight:500;text-align:center}
+    .sens-table td{padding:7px 10px;border:1px solid var(--border);text-align:center}
+    .payback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .payback-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+    .pb-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .pb-val{font-family:var(--mono);font-size:24px}
+    .tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .tier-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+    .tier-name{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .tier-mrr{font-family:var(--mono);font-size:15px;color:var(--accent);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+    .cbad{background:var(--red-bg);color:var(--red)}.cok{background:var(--amber-bg);color:var(--amber)}.cgood{background:var(--green-bg);color:var(--green)}
+    .sens-table .rhdr{background:var(--bg3);color:var(--muted);text-align:left}
+    .cohort-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+    .cohort-table th{padding:7px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-weight:500;text-align:center}
+    .cohort-table td{padding:6px 10px;border:1px solid var(--border);text-align:center}
+    .cohort-table .clbl{text-align:left;background:var(--bg2);color:var(--muted)}
+  
+
+    /* ── ENHANCED PRO SECTIONS ── */
+    .pro-mini-preview{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      width:100%;
+    }
+    .pro-mini-card{
+      background:linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 14px 12px;
+      min-height:86px;
+      box-shadow:var(--shadow);
+    }
+    .pro-mini-k{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    .pro-mini-v{
+      font-family:var(--serif);
+      font-size:22px;
+      line-height:1;
+      color:var(--text);
+      margin-bottom:6px;
+    }
+    .pro-mini-s{
+      font-family:var(--mono);
+      font-size:10px;
+      line-height:1.7;
+      color:var(--muted);
+    }
+    .pro-teaser-stack{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      width:100%;
+    }
+    .pro-teaser-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      background:linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+    .pro-teaser-copy{display:flex;flex-direction:column;gap:3px}
+    .pro-teaser-copy strong{
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-weight:500;
+      color:var(--text);
+    }
+    .pro-teaser-copy span{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .pro-teaser-pill{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--accent);
+      background:var(--accent-bg);
+      border:1px solid rgba(184,92,42,.18);
+      border-radius:999px;
+      padding:5px 9px;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .growth-lab-shell{
+      position:relative;
+      background:
+        radial-gradient(circle at top left, rgba(184,92,42,.10), transparent 36%),
+        linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:26px;
+      box-shadow:0 12px 36px rgba(26,22,18,.08);
+      overflow:hidden;
+    }
+    .growth-lab-shell::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(184,92,42,.05), transparent 42%);
+      pointer-events:none;
+    }
+    .growth-lab-intro{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 260px;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:20px;
+      position:relative;
+      z-index:1;
+    }
+    .growth-lab-copy{
+      background:rgba(255,255,255,.46);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:20px 22px;
+      backdrop-filter:blur(6px);
+    }
+    [data-theme="dark"] .growth-lab-copy{background:rgba(36,31,25,.48)}
+    .growth-lab-kicker{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:10px;
+    }
+    .growth-lab-copy h3{
+      font-family:var(--serif);
+      font-size:34px;
+      line-height:1.02;
+      font-weight:400;
+      margin-bottom:10px;
+    }
+    .growth-lab-copy p{
+      font-family:var(--mono);
+      font-size:11px;
+      line-height:1.9;
+      color:var(--muted);
+      max-width:560px;
+    }
+    .growth-lab-side{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .growth-side-label{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .growth-side-price{
+      font-family:var(--serif);
+      font-size:40px;
+      line-height:1;
+      color:var(--accent);
+    }
+    .growth-side-note{
+      font-family:var(--mono);
+      font-size:10px;
+      line-height:1.8;
+      color:var(--muted);
+    }
+    .growth-side-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .growth-side-tags span{
+      font-family:var(--mono);
+      font-size:9px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--bg2);
+      color:var(--muted);
+    }
+    .growth-tabs-wrap{
+      position:relative;
+      z-index:1;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:20px;
+      background:rgba(255,255,255,.38);
+      backdrop-filter:blur(6px);
+    }
+    [data-theme="dark"] .growth-tabs-wrap{background:rgba(36,31,25,.42)}
+    .gl-overlay-card{
+      background:var(--surface);
+      border:1px solid var(--border2);
+      border-radius:22px;
+      padding:30px 32px;
+      max-width:500px;
+      width:100%;
+      box-shadow:0 16px 44px rgba(26,22,18,.16);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      text-align:center;
+    }
+    .gl-overlay-topline{
+      font-family:var(--mono);
+      font-size:9px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      background:var(--accent);
+      color:#fff;
+      padding:4px 12px;
+      border-radius:999px;
+    }
+    .gl-overlay-card h3{
+      font-family:var(--serif);
+      font-size:30px;
+      line-height:1.05;
+      font-weight:400;
+      color:var(--text);
+    }
+    .gl-overlay-card p{
+      font-family:var(--mono);
+      font-size:11px;
+      line-height:1.9;
+      color:var(--muted);
+      max-width:380px;
+    }
+    .gl-secure-note{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--faint);
+      letter-spacing:.03em;
+    }
+    @media(max-width:960px){
+      .growth-lab-intro{grid-template-columns:1fr}
+    }
+    @media(max-width:640px){
+      .pro-mini-preview{grid-template-columns:1fr}
+      .growth-lab-shell{padding:18px}
+      .growth-tabs-wrap{padding:14px}
+      .gl-overlay-card{padding:22px 20px}
+      .gl-overlay-card h3{font-size:26px}
+      .growth-lab-copy h3{font-size:28px}
+      .pro-teaser-row{align-items:flex-start;flex-direction:column}
+    }
+
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="#" onclick="return false;"><span>Kat</span>Tools</a>
+    <div class="nav-right">
+      <a class="nav-link" href="#calculator">Calculator</a>
+      <a class="nav-link" href="#timeline">Timeline</a>
+      <a class="nav-link" href="#pro-preview">Growth Lab</a>
+      <a class="nav-link" href="#tips">Tips</a>
+      <button class="upgrade-nav-btn" onclick="openStripeModal()">Pro ✦</button>
+      <button class="theme-btn" onclick="window.print()">Save / Print</button>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark mode</button>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-eyebrow">Founder mode</div>
+      <h1>The SaaS<br><em>Growth</em> Simulator</h1>
+      <p class="hero-sub">
+        Model your users, churn, pricing, costs, and growth to see if your SaaS can actually scale —
+        or if it breaks before it gets there.
+      </p>
+      <div class="hero-bar">
+        <span class="hero-bar-label">Billing price</span>
+        <div class="money-input-wrap">
+          <span class="money-prefix">$</span>
+          <input id="priceTop" class="money-input" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
+        </div>
+        <div class="toggle-row" id="billingPeriodRow"></div>
+      </div>
+    </header>
+
+    <section id="calculator">
+      <div class="section-head">
+        <span class="section-title">Build your SaaS model</span>
+        <span class="section-sub">pricing + users + churn + costs</span>
+      </div>
+
+      <div class="main-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">SaaS presets</span>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+            <div class="small-note">
+              These presets auto-adjust billing period, price, starting users, growth, churn, and monthly costs.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Core inputs</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="price">Billing price</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="price" type="text" value="20" oninput="syncTopPrice(this)" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Billing period</label>
+                <div class="toggle-row" id="billingPeriodRowBottom"></div>
+              </div>
+
+              <div class="field">
+                <label for="startingUsers">Starting users</label>
+                <input id="startingUsers" class="input mono" type="number" min="0" value="25" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="newUsers">New users per month</label>
+                <input id="newUsers" class="input mono" type="number" min="0" value="20" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="churn">Monthly churn %</label>
+                <input id="churn" class="input mono" type="number" min="0" max="100" step="0.1" value="6" oninput="update()">
+              </div>
+
+              <div class="field">
+                <label for="monthlyCosts">Monthly operating costs</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="monthlyCosts" type="text" value="1,200" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="cac">Customer acquisition cost (CAC)</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="cac" type="text" value="15" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="targetMRR">Target MRR</label>
+                <div class="inline-money">
+                  <span>$</span>
+                  <input id="targetMRR" type="text" value="10,000" oninput="update()" onblur="formatMoneyInput(this)">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="projectionMonths">Projection window</label>
+                <select id="projectionMonths" class="select" onchange="update()">
+                  <option value="6">6 months</option>
+                  <option value="12" selected>12 months</option>
+                  <option value="18">18 months</option>
+                  <option value="24">24 months</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="small-note" id="billingNote"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Model breakdown</span>
+              <button class="mini-btn" onclick="resetDefaults()">Reset</button>
+            </div>
+            <div class="table-card" style="box-shadow:none;border:none;background:transparent;">
+              <table class="pricing-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdownRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel" id="timeline">
+            <div class="panel-hdr">
+              <span class="panel-label">Growth timeline</span>
+            </div>
+            <div class="timeline-grid" id="timelineGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Revenue mix preview</span>
+            </div>
+            <div class="chart-wrap">
+              <div class="bar-track" id="revenueBar"></div>
+              <div class="chart-legend" id="revenueLegend"></div>
+            </div>
+          </div>
+
+          <!-- PRO: Growth Chart (locked) -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Growth chart <span class="pro-badge">Pro</span></span>
+              <div style="display:flex;gap:6px">
+                <button class="period-btn active" disabled>MRR</button>
+                <button class="period-btn" disabled>Users</button>
+                <button class="period-btn" disabled>Profit</button>
+              </div>
+            </div>
+            <div class="pro-lock-wrap">
+              <div class="pro-blur-inner">
+                <div class="chart-container"><canvas id="growthChartPreview"></canvas></div>
+              </div>
+              <div class="pro-overlay">
+                <div class="pro-overlay-icon">📈</div>
+                <div class="pro-overlay-badge">Pro Feature</div>
+                <div class="pro-overlay-title">Interactive Growth Chart</div>
+                <div class="pro-overlay-desc">Toggle between MRR, Users, and Profit projections across your entire runway. Built with Chart.js and live-synced to your inputs.</div>
+                <button class="pro-overlay-btn" onclick="openStripeModal()">Unlock Pro — $35 one-time</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="big-card">
+            <div class="panel-label" style="margin-bottom:10px;">Result mode</div>
+            <div class="mode-row" id="modeRow"></div>
+
+            <div class="big-label" id="resultLabel">Current MRR</div>
+            <div class="big-val" id="headlineValue">$0</div>
+            <div class="big-sub" id="headlineSub"></div>
+          </div>
+
+          <div class="stat-grid" id="statGrid"></div>
+
+          <div id="biggestProblemBox"></div>
+          <div id="goalBox"></div>
+          <div id="profitabilityBox"></div>
+          <div id="billingInsightBox"></div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Break-even & milestones</span>
+            </div>
+            <div class="mini-grid" id="milestoneGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">User economics</span>
+            </div>
+            <div class="mini-grid" id="economicsGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Scenario comparison</span>
+            </div>
+            <div class="scenario-grid" id="scenarioGrid"></div>
+          </div>
+
+          <!-- PRO: Insights teaser panel -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Pro insights <span class="pro-badge">Pro</span></span>
+            </div>
+            <div class="pro-lock-wrap">
+              <div class="pro-blur-inner" style="padding:8px 0">
+                <div class="pro-mini-preview">
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Sensitivity</div>
+                    <div class="pro-mini-v">5×5</div>
+                    <div class="pro-mini-s">price × churn matrix with break-even color cues</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Cohorts</div>
+                    <div class="pro-mini-v">12 mo</div>
+                    <div class="pro-mini-s">retention snapshots across every new user batch</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Payback</div>
+                    <div class="pro-mini-v">LTV/CAC</div>
+                    <div class="pro-mini-s">see how fast acquisition spend comes back</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Scenarios</div>
+                    <div class="pro-mini-v">3 views</div>
+                    <div class="pro-mini-s">base, optimistic, and downside models side by side</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pro-overlay" style="padding:20px 16px">
+                <div class="pro-overlay-badge">Growth Lab</div>
+                <div class="pro-overlay-title" style="font-size:18px">Unlock the full Growth Lab</div>
+                <div class="pro-overlay-desc" style="max-width:320px">Cleaner planning tools, faster what-if checks, and better pressure-testing before you commit to a growth path.</div>
+                <button class="pro-overlay-btn" onclick="openStripeModal()">Unlock Pro — $35 one-time</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="pro-preview">
+      <div class="section-head">
+        <span class="section-title">Growth Lab <span class="pro-badge">Pro</span></span>
+        <span class="section-sub">scenario builder · sensitivity · cohorts · CAC payback · pricing tiers</span>
+      </div>
+
+      <div class="growth-lab-shell">
+        <div class="growth-lab-intro">
+          <div class="growth-lab-copy">
+            <div class="growth-lab-kicker">Founder-level planning</div>
+            <h3>Pressure-test the model<br><em>before growth gets expensive.</em></h3>
+            <p>Growth Lab takes the nice-looking headline numbers and pushes them harder. Check how churn reshapes revenue, compare upside versus downside, and spot weak assumptions before you spend more on acquisition.</p>
+          </div>
+          <div class="growth-lab-side">
+            <div class="growth-side-label">One-time unlock</div>
+            <div class="growth-side-price">$35</div>
+            <div class="growth-side-note">Lifetime access to the premium planning layer for this tool.</div>
+            <div class="growth-side-tags"><span>Scenario Builder</span><span>Sensitivity Grid</span><span>Cohorts</span><span>CAC Payback</span></div>
+          </div>
+        </div>
+
+      <div class="pro-lock-wrap">
+        <div class="pro-blur-inner">
+
+          <div class="growth-tabs-wrap">
+          <div class="tab-bar">
+            <button class="tab-btn active">Scenario Builder</button>
+            <button class="tab-btn">Sensitivity Matrix</button>
+            <button class="tab-btn">Cohort Analysis</button>
+            <button class="tab-btn">CAC Payback</button>
+            <button class="tab-btn">Pricing Tiers</button>
+          </div>
+
+          <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:16px">Edit each scenario and compare projected MRR side by side. Base is pulled from your current inputs.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <button class="mini-btn">Save current scenario</button>
+            <select style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none"><option>Load a saved scenario…</option></select>
+            <button class="mini-btn">Delete selected</button>
+          </div>
+          <div class="sb-grid">
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--muted)">Base</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="6" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--muted)">$7,840</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">312 users · $4,640/mo profit</div></div>
+            </div>
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--green)">Optimistic</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="24" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="26" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="5" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--green)">$14,208</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">498 users · $13,008/mo profit</div></div>
+            </div>
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--red)">Pessimistic</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="14" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="8" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--red)">$3,120</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">156 users · $1,920/mo profit</div></div>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;margin-bottom:6px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Final MRR across combinations of monthly price and churn. Green = above break-even, red = below.</p>
+            <div style="overflow-x:auto">
+              <table class="sens-table">
+                <thead><tr><th>Price / Churn</th><th>2.0% churn</th><th>4.0% churn</th><th>6.0% churn</th><th>8.0% churn</th><th>10.0% churn</th></tr></thead>
+                <tbody>
+                  <tr><td class="rhdr">$12/mo</td><td class="cgood">$5,280</td><td class="cgood">$3,960</td><td class="cok">$2,640</td><td class="cbad">$1,560</td><td class="cbad">$960</td></tr>
+                  <tr><td class="rhdr">$16/mo</td><td class="cgood">$7,040</td><td class="cgood">$5,280</td><td class="cgood">$3,520</td><td class="cok">$2,080</td><td class="cbad">$1,280</td></tr>
+                  <tr><td class="rhdr">$20/mo</td><td class="cgood">$8,800</td><td class="cgood">$6,600</td><td class="cgood">$4,400</td><td class="cok">$2,600</td><td class="cok">$1,600</td></tr>
+                  <tr><td class="rhdr">$24/mo</td><td class="cgood">$10,560</td><td class="cgood">$7,920</td><td class="cgood">$5,280</td><td class="cgood">$3,120</td><td class="cok">$1,920</td></tr>
+                  <tr><td class="rhdr">$30/mo</td><td class="cgood">$13,200</td><td class="cgood">$9,900</td><td class="cgood">$6,600</td><td class="cgood">$3,900</td><td class="cok">$2,400</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Each row = a monthly cohort of new users. Columns show surviving users after N months at your churn rate.</p>
+            <div style="overflow-x:auto">
+              <table class="cohort-table">
+                <thead><tr><th>Cohort</th><th>M+0</th><th>M+1</th><th>M+2</th><th>M+3</th><th>M+4</th><th>M+5</th><th>M+6</th></tr></thead>
+                <tbody>
+                  <tr><td class="clbl">Cohort 1 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                  <tr><td class="clbl">Cohort 2 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                  <tr><td class="clbl">Cohort 3 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">How long does it take to recover what you spend to acquire each user?</p>
+            <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px">Gross margin <input type="number" value="80" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"> %</div>
+            <div class="payback-grid">
+              <div class="payback-card"><div class="pb-label">CAC Payback Period</div><div class="pb-val" style="color:var(--green)">9.4 mo</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">to recover $15 CAC</div></div>
+              <div class="payback-card"><div class="pb-label">Avg User Lifetime</div><div class="pb-val">16.7 mo</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">at 6.0% monthly churn</div></div>
+              <div class="payback-card"><div class="pb-label">LTV (gross margin)</div><div class="pb-val" style="color:var(--accent)">$267</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">LTV/CAC = 17.8x</div></div>
+            </div>
+            <div class="info-box">Payback of 9.4 months is healthy. With a 17.8x LTV/CAC ratio, you have room to invest more in growth.</div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Model up to 4 pricing tiers. Set price and estimated users per tier to see blended MRR and ARPU.</p>
+            <div class="tier-grid">
+              <div class="tier-card"><div class="tier-name">Starter</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="9" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="50" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$450/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Basic</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="19" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="30" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$570/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Pro</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="49" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="15" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$735/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Enterprise</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="149" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="5" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$745/mo</div></div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">Blended MRR: <span style="color:var(--text)">$2,500</span>&nbsp;&nbsp;·&nbsp;&nbsp;Blended ARPU: <span style="color:var(--text)">$25</span>&nbsp;&nbsp;·&nbsp;&nbsp;Total users: <span style="color:var(--text)">100</span></div>
+          </div>
+
+          </div>
+        </div><!-- /pro-blur-inner -->
+
+        <!-- Lock overlay -->
+        <div class="pro-overlay">
+          <div class="gl-overlay-card">
+            <div class="gl-overlay-topline">One-time unlock · $35</div>
+            <h3>Everything in Growth Lab,<br><em>unlocked for good.</em></h3>
+            <p>Get the polished premium planning layer: compare scenarios, stress-test churn, inspect cohorts, and understand payback with a cleaner, higher-converting upgrade section.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:390px">
+              <span class="pro-feat-chip">📊 Scenario Builder</span>
+              <span class="pro-feat-chip">🔥 Sensitivity Matrix</span>
+              <span class="pro-feat-chip">👥 Cohort Analysis</span>
+              <span class="pro-feat-chip">💰 CAC Payback</span>
+              <span class="pro-feat-chip">🏷️ Pricing Tiers</span>
+              <span class="pro-feat-chip">📈 Growth Chart</span>
+              <span class="pro-feat-chip">↓ CSV Export</span>
+            </div>
+            <a href="https://buy.stripe.com/14AfZadxb0k82ktbGeaR202" target="_blank" class="pro-overlay-btn" style="text-decoration:none;display:inline-block">Unlock Pro — $35 one-time →</a>
+            <div class="gl-secure-note">🔒 Secure checkout via Stripe · instant access after purchase</div>
+          </div>
+        </div>
+
+      </div><!-- /pro-lock-wrap -->
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="tips">
+      <div class="section-head">
+        <span class="section-title">SaaS reminders</span>
+      </div>
+
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="tip-num">01</div>
+          <div class="tip-title">Churn kills quietly</div>
+          <div class="tip-body">You can add users every month and still stall if churn keeps erasing your growth.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">02</div>
+          <div class="tip-title">Price is leverage</div>
+          <div class="tip-body">A small increase in price can move MRR faster than chasing the same number of extra users.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">03</div>
+          <div class="tip-title">LTV must beat CAC</div>
+          <div class="tip-body">If your customer is not worth much more than the cost to acquire them, scale gets dangerous fast.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">04</div>
+          <div class="tip-title">Costs matter early</div>
+          <div class="tip-body">A tiny product can still fail if infrastructure, tools, and paid growth outpace the revenue base.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>SaaS Growth Simulator · Built to test whether your product can really scale.</div>
+      <div style="margin-top:.5rem">Upgrade to Pro for the full Growth Lab — scenario builder, cohorts, payback, sensitivity, tiers.</div>
+    </footer>
+  </div>
+
+  <!-- ── STRIPE MODAL ── -->
+  <div class="stripe-modal-bg" id="stripeModalBg" onclick="handleModalBgClick(event)">
+    <div class="stripe-modal">
+      <div class="stripe-modal-hdr">
+        <div class="stripe-modal-title">Upgrade to <em>Pro</em></div>
+        <button class="stripe-modal-close" onclick="closeStripeModal()">×</button>
+      </div>
+      <div class="stripe-modal-body">
+        <div class="stripe-price-display">
+          <div class="stripe-price-label">KatTools Pro</div>
+          <div class="stripe-price-amount">$35</div>
+          <div class="stripe-price-period">one-time payment · lifetime access</div>
+        </div>
+        <ul class="stripe-features-list">
+          <li>Interactive growth chart (MRR, Users, Profit)</li>
+          <li>Scenario Builder — Base, Optimistic, Pessimistic</li>
+          <li>Sensitivity Matrix — price × churn grid</li>
+          <li>Cohort Analysis — 6 cohorts × 12 months</li>
+          <li>CAC Payback &amp; LTV/CAC calculator</li>
+          <li>Pricing Tiers — 4-tier blended ARPU</li>
+          <li>CSV export of all projections</li>
+        </ul>
+        <a href="https://buy.stripe.com/14AfZadxb0k82ktbGeaR202" target="_blank" class="stripe-pay-btn" style="text-decoration:none;display:block;text-align:center;line-height:normal;padding-top:14px;padding-bottom:14px">
+          Pay $35 once →
+        </a>
+        <div class="stripe-secure">🔒 Secured by Stripe · SSL encrypted · one-time checkout</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── STRIPE MODAL ─────────────────────────────────────────
+    function openStripeModal() {
+      document.getElementById('stripeModalBg').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeStripeModal() {
+      document.getElementById('stripeModalBg').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function handleModalBgClick(e) {
+      if (e.target === document.getElementById('stripeModalBg')) closeStripeModal();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStripeModal(); });
+  </script>
+
+  <script>
+    function toggleTheme(){
+      const html = document.documentElement;
+      const dark = html.dataset.theme !== 'dark';
+      html.dataset.theme = dark ? 'dark' : 'light';
+      document.getElementById('themeBtn').textContent = dark ? 'Light mode' : 'Dark mode';
+      localStorage.setItem('kc-theme', html.dataset.theme);
+    }
+
+    (function(){
+      const saved = localStorage.getItem('kc-theme');
+      if(saved){
+        document.documentElement.dataset.theme = saved;
+        document.addEventListener('DOMContentLoaded', () => {
+          const btn = document.getElementById('themeBtn');
+          if(btn) btn.textContent = saved === 'dark' ? 'Light mode' : 'Dark mode';
+        });
+      }
+    })();
+
+    const PRESETS = [
+      {
+        id: 'micro',
+        icon: '🧩',
+        name: 'Micro SaaS',
+        desc: 'Lean solo tool',
+        billingPeriod: 'month',
+        price: 12,
+        startingUsers: 20,
+        newUsers: 10,
+        churn: 5,
+        costs: 350,
+        cac: 8
+      },
+      {
+        id: 'startup',
+        icon: '🚀',
+        name: 'Startup Push',
+        desc: 'Actively growing app',
+        billingPeriod: 'month',
+        price: 20,
+        startingUsers: 25,
+        newUsers: 20,
+        churn: 6,
+        costs: 1200,
+        cac: 15
+      },
+      {
+        id: 'b2b',
+        icon: '🏢',
+        name: 'B2B SaaS',
+        desc: 'Higher price, lower volume',
+        billingPeriod: 'month',
+        price: 79,
+        startingUsers: 10,
+        newUsers: 6,
+        churn: 3,
+        costs: 2500,
+        cac: 60
+      },
+      {
+        id: 'consumer',
+        icon: '📱',
+        name: 'Consumer App',
+        desc: 'Lower price, faster churn',
+        billingPeriod: 'month',
+        price: 9,
+        startingUsers: 100,
+        newUsers: 80,
+        churn: 9,
+        costs: 1800,
+        cac: 6
+      },
+      {
+        id: 'weekly-tool',
+        icon: '⏱️',
+        name: 'Weekly Tool',
+        desc: 'Low-ticket fast recurring',
+        billingPeriod: 'week',
+        price: 5,
+        startingUsers: 80,
+        newUsers: 35,
+        churn: 11,
+        costs: 700,
+        cac: 5
+      },
+      {
+        id: 'annual-b2b',
+        icon: '📦',
+        name: 'Annual B2B',
+        desc: 'Yearly contracts, lower churn',
+        billingPeriod: 'year',
+        price: 600,
+        startingUsers: 12,
+        newUsers: 4,
+        churn: 1.5,
+        costs: 3200,
+        cac: 120
+      },
+      {
+        id: 'ai-tool',
+        icon: '🤖',
+        name: 'AI Tool',
+        desc: 'Higher infra, strong pricing',
+        billingPeriod: 'month',
+        price: 29,
+        startingUsers: 35,
+        newUsers: 30,
+        churn: 7,
+        costs: 2600,
+        cac: 22
+      }
+    ];
+
+    const RESULT_MODES = [
+      { id: 'mrr', label: 'MRR' },
+      { id: 'users', label: 'Users' },
+      { id: 'breakeven', label: 'Break-even' },
+      { id: 'ltv', label: 'LTV' }
+    ];
+
+    const BILLING_PERIODS = [
+      { id: 'week', label: 'Week', toMonthly: 4.3333333333 },
+      { id: 'month', label: 'Month', toMonthly: 1 },
+      { id: 'year', label: 'Year', toMonthly: 1/12 }
+    ];
+
+    let activePreset = PRESETS[1];
+    let activeMode = 'mrr';
+    let activeBillingPeriod = 'month';
+
+    function renderPresets(){
+      const grid = document.getElementById('presetGrid');
+      grid.innerHTML = PRESETS.map(p => `
+        <div class="preset-card${p.id === activePreset.id ? ' active' : ''}" onclick="pickPreset('${p.id}')">
+          <span class="pc-icon">${p.icon}</span>
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-desc">${p.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderModes(){
+      const row = document.getElementById('modeRow');
+      row.innerHTML = RESULT_MODES.map(m => `
+        <button class="mode-btn${m.id === activeMode ? ' active' : ''}" onclick="setMode('${m.id}')">${m.label}</button>
+      `).join('');
+    }
+
+    function renderBillingPeriods(){
+      const btns = BILLING_PERIODS.map(p => `
+        <button class="period-btn${p.id === activeBillingPeriod ? ' active' : ''}" onclick="setBillingPeriod('${p.id}')">${p.label}</button>
+      `).join('');
+      document.getElementById('billingPeriodRow').innerHTML = btns;
+      document.getElementById('billingPeriodRowBottom').innerHTML = btns;
+    }
+
+    function setMode(id){
+      activeMode = id;
+      renderModes();
+      update();
+    }
+
+    function setBillingPeriod(id){
+      activeBillingPeriod = id;
+      renderBillingPeriods();
+      update();
+    }
+
+    function pickPreset(id){
+      activePreset = PRESETS.find(p => p.id === id) || PRESETS[1];
+      activeBillingPeriod = activePreset.billingPeriod;
+      document.getElementById('price').value = activePreset.price.toLocaleString();
+      document.getElementById('priceTop').value = activePreset.price.toLocaleString();
+      document.getElementById('startingUsers').value = activePreset.startingUsers;
+      document.getElementById('newUsers').value = activePreset.newUsers;
+      document.getElementById('churn').value = activePreset.churn;
+      document.getElementById('monthlyCosts').value = activePreset.costs.toLocaleString();
+      document.getElementById('cac').value = activePreset.cac.toLocaleString();
+      renderPresets();
+      renderBillingPeriods();
+      update();
+    }
+
+    function parseMoney(str){
+      return parseInt(String(str).replace(/[^0-9]/g,'')) || 0;
+    }
+
+    function formatMoneyInput(el){
+      const n = parseMoney(el.value);
+      el.value = n.toLocaleString();
+    }
+
+    function syncTopPrice(el){
+      const n = parseMoney(el.value);
+      document.getElementById('price').value = n.toLocaleString();
+      document.getElementById('priceTop').value = n.toLocaleString();
+      update();
+    }
+
+    function fmtMoney(n){
+      return '$' + Math.round(n).toLocaleString();
+    }
+
+    function fmtPct(n){
+      return (Math.round(n * 10) / 10) + '%';
+    }
+
+    function ceilSafe(n){
+      return Number.isFinite(n) ? Math.ceil(n) : Infinity;
+    }
+
+    function getBillingMeta(){
+      return BILLING_PERIODS.find(p => p.id === activeBillingPeriod) || BILLING_PERIODS[1];
+    }
+
+    function getMonthlyEquivalent(price){
+      return price * getBillingMeta().toMonthly;
+    }
+
+    function resetDefaults(){
+      activePreset = PRESETS[1];
+      activeMode = 'mrr';
+      renderPresets();
+      renderModes();
+      pickPreset(activePreset.id);
+      document.getElementById('targetMRR').value = '10,000';
+      document.getElementById('projectionMonths').value = '12';
+      update();
+    }
+
+    function simulateMonths(startingUsers, newUsers, churnRate, monthlyEquivalentPrice, months, monthlyCosts){
+      let users = startingUsers;
+      const rows = [];
+
+      for(let month = 1; month <= months; month++){
+        const churned = users * churnRate;
+        const endingUsers = Math.max(0, users - churned + newUsers);
+        const mrr = endingUsers * monthlyEquivalentPrice;
+        const profit = mrr - monthlyCosts;
+
+        rows.push({
+          month,
+          startUsers: users,
+          churned,
+          newUsers,
+          endUsers: endingUsers,
+          mrr,
+          profit
+        });
+
+        users = endingUsers;
+      }
+
+      return rows;
+    }
+
+    function firstMonthWhere(rows, fn){
+      const found = rows.find(fn);
+      return found ? found.month : null;
+    }
+
+    function update(){
+      const price = parseMoney(document.getElementById('price').value);
+      const startingUsers = +document.getElementById('startingUsers').value || 0;
+      const newUsers = +document.getElementById('newUsers').value || 0;
+      const churn = (+document.getElementById('churn').value || 0) / 100;
+      const monthlyCosts = parseMoney(document.getElementById('monthlyCosts').value);
+      const cac = parseMoney(document.getElementById('cac').value);
+      const targetMRR = parseMoney(document.getElementById('targetMRR').value);
+      const projectionMonths = +document.getElementById('projectionMonths').value || 12;
+      const billingMeta = getBillingMeta();
+
+      const monthlyEquivalentPrice = getMonthlyEquivalent(price);
+      const currentMRR = startingUsers * monthlyEquivalentPrice;
+      const currentProfit = currentMRR - monthlyCosts;
+      const churnedNow = startingUsers * churn;
+      const ltv = churn > 0 ? monthlyEquivalentPrice / churn : Infinity;
+      const ltvLabel = Number.isFinite(ltv) ? fmtMoney(ltv) : '∞';
+      const ltvToCac = cac > 0 && Number.isFinite(ltv) ? (ltv / cac) : Infinity;
+      const ltvToCacLabel = Number.isFinite(ltvToCac) ? (Math.round(ltvToCac * 10) / 10) + 'x' : '∞';
+      const breakEvenUsers = monthlyEquivalentPrice > 0 ? ceilSafe(monthlyCosts / monthlyEquivalentPrice) : Infinity;
+      const breakEvenMRR = breakEvenUsers === Infinity ? Infinity : breakEvenUsers * monthlyEquivalentPrice;
+
+      const rows = simulateMonths(startingUsers, newUsers, churn, monthlyEquivalentPrice, projectionMonths, monthlyCosts);
+      const finalRow = rows[rows.length - 1] || { endUsers: startingUsers, mrr: currentMRR, profit: currentProfit };
+      const monthToBreakEven = firstMonthWhere(rows, r => r.mrr >= monthlyCosts);
+      const monthToTarget = firstMonthWhere(rows, r => r.mrr >= targetMRR);
+      const monthOne = rows[0] || finalRow;
+      const monthTwelve = rows[Math.min(11, rows.length - 1)] || finalRow;
+
+      let resultLabel = 'Current MRR';
+      let resultValue = fmtMoney(currentMRR);
+      let resultSub = `${startingUsers} users · ${fmtMoney(price)}/${activeBillingPeriod} · ${fmtMoney(currentProfit)} monthly profit`;
+
+      if(activeMode === 'users'){
+        resultLabel = 'Projected users';
+        resultValue = Math.round(finalRow.endUsers).toLocaleString();
+        resultSub = `after ${projectionMonths} months · start ${startingUsers} · add ${newUsers}/month`;
+      } else if(activeMode === 'breakeven'){
+        resultLabel = 'Break-even users';
+        resultValue = breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString();
+        resultSub = `${breakEvenMRR === Infinity ? '∞' : fmtMoney(breakEvenMRR)} in monthly revenue needed to cover monthly costs`;
+      } else if(activeMode === 'ltv'){
+        resultLabel = 'Lifetime value';
+        resultValue = ltvLabel;
+        resultSub = `LTV/CAC ${ltvToCacLabel} · churn ${fmtPct(churn * 100)} · normalized to monthly`;
+      }
+
+      document.getElementById('resultLabel').textContent = resultLabel;
+      document.getElementById('headlineValue').textContent = resultValue;
+      document.getElementById('headlineSub').textContent = resultSub;
+
+      document.getElementById('billingNote').textContent =
+        `Selected billing period: ${activeBillingPeriod}. For comparisons, projections, LTV, MRR, and break-even are normalized to monthly revenue. ${fmtMoney(price)}/${activeBillingPeriod} is treated as ${fmtMoney(monthlyEquivalentPrice)}/month equivalent.`;
+
+      document.getElementById('statGrid').innerHTML = [
+        {
+          l:'Current MRR',
+          v:fmtMoney(currentMRR),
+          s:'monthly normalized revenue',
+          c:'var(--accent)'
+        },
+        {
+          l:'Monthly profit',
+          v:fmtMoney(currentProfit),
+          s:'after monthly costs',
+          c: currentProfit >= 0 ? 'var(--green)' : 'var(--red)'
+        },
+        {
+          l:'Churned users now',
+          v:Math.round(churnedNow * 10) / 10,
+          s:'lost per month at current base',
+          c:'var(--amber)'
+        },
+        {
+          l:'LTV / CAC',
+          v:ltvToCacLabel,
+          s:'user economics health',
+          c: Number.isFinite(ltvToCac) && ltvToCac >= 3 ? 'var(--green)' : 'var(--amber)'
+        }
+      ].map(s => `
+        <div class="stat">
+          <div class="stat-l">${s.l}</div>
+          <div class="stat-v" style="color:${s.c}">${s.v}</div>
+          <div class="stat-s">${s.s}</div>
+        </div>
+      `).join('');
+
+      let biggestProblemHTML = '';
+      if(churn >= 0.08){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: churn is high. Even if you keep adding users, too much of your growth is leaking out every month.
+          </div>
+        `;
+      } else if(monthlyEquivalentPrice <= 10 && monthlyCosts >= 1000){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: your effective monthly price is probably too low for your cost base. You may need stronger pricing before chasing scale.
+          </div>
+        `;
+      } else if(newUsers <= churnedNow){
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest problem: you are not adding users fast enough to outgrow churn. Your growth engine is too weak right now.
+          </div>
+        `;
+      } else {
+        biggestProblemHTML = `
+          <div class="blue-box">
+            Biggest lever: your model is viable on paper. The next big gains likely come from reducing churn a little or raising price slightly.
+          </div>
+        `;
+      }
+      document.getElementById('biggestProblemBox').innerHTML = biggestProblemHTML;
+
+      let goalHTML = '';
+      if(monthToTarget){
+        goalHTML = `
+          <div class="info-box">
+            ${fmtMoney(targetMRR)} MRR target: reachable in month ${monthToTarget} at your current setup.
+          </div>
+        `;
+      } else {
+        goalHTML = `
+          <div class="warning-box">
+            ${fmtMoney(targetMRR)} MRR target: not reached within ${projectionMonths} months at your current setup.
+          </div>
+        `;
+      }
+      document.getElementById('goalBox').innerHTML = goalHTML;
+
+      let profitabilityHTML = '';
+      if(currentProfit >= 0){
+        profitabilityHTML = `
+          <div class="info-box">
+            You are already above break-even on the current numbers. Now the focus is protecting churn and improving LTV.
+          </div>
+        `;
+      } else if(monthToBreakEven){
+        profitabilityHTML = `
+          <div class="soft-box">
+            You are not profitable yet, but this model crosses break-even in month ${monthToBreakEven} if growth holds.
+          </div>
+        `;
+      } else {
+        profitabilityHTML = `
+          <div class="warning-box">
+            This setup does not break even within the current projection window. Either reduce costs, increase effective price, or grow faster.
+          </div>
+        `;
+      }
+      document.getElementById('profitabilityBox').innerHTML = profitabilityHTML;
+
+      let billingInsightHTML = '';
+      if(activeBillingPeriod === 'week'){
+        billingInsightHTML = `
+          <div class="soft-box">
+            Weekly billing can boost short-term cash flow, but it often comes with higher churn sensitivity and more billing fatigue.
+          </div>
+        `;
+      } else if(activeBillingPeriod === 'year'){
+        billingInsightHTML = `
+          <div class="info-box">
+            Yearly billing can dramatically improve upfront cash collection and retention, but it usually requires stronger trust and higher acquisition effort.
+          </div>
+        `;
+      } else {
+        billingInsightHTML = `
+          <div class="soft-box">
+            Monthly billing is the cleanest default for modeling recurring SaaS revenue. It is usually the easiest to compare against costs and churn.
+          </div>
+        `;
+      }
+      document.getElementById('billingInsightBox').innerHTML = billingInsightHTML;
+
+      document.getElementById('milestoneGrid').innerHTML = `
+        <div class="mini-card">
+          <div class="mini-k">Break-even users</div>
+          <div class="mini-v">${breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString()}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">Break-even month</div>
+          <div class="mini-v">${monthToBreakEven || '—'}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">${fmtMoney(1000)} MRR</div>
+          <div class="mini-v">${firstMonthWhere(rows, r => r.mrr >= 1000) || '—'}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">${fmtMoney(10000)} MRR</div>
+          <div class="mini-v">${firstMonthWhere(rows, r => r.mrr >= 10000) || '—'}</div>
+        </div>
+      `;
+
+      document.getElementById('economicsGrid').innerHTML = `
+        <div class="mini-card">
+          <div class="mini-k">LTV</div>
+          <div class="mini-v">${ltvLabel}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">CAC</div>
+          <div class="mini-v">${fmtMoney(cac)}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">LTV / CAC</div>
+          <div class="mini-v">${ltvToCacLabel}</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-k">Final month MRR</div>
+          <div class="mini-v">${fmtMoney(finalRow.mrr)}</div>
+        </div>
+      `;
+
+      const priceUpMRR = finalRow.endUsers * Math.round(monthlyEquivalentPrice * 1.2);
+      const lowerChurnRows = simulateMonths(startingUsers, newUsers, Math.max(0, churn - 0.02), monthlyEquivalentPrice, projectionMonths, monthlyCosts);
+      const lowerChurnFinal = lowerChurnRows[lowerChurnRows.length - 1] || finalRow;
+
+      document.getElementById('scenarioGrid').innerHTML = [
+        {
+          name: 'Current setup',
+          price: finalRow.mrr,
+          desc: `Projected MRR after ${projectionMonths} months`
+        },
+        {
+          name: 'Raise effective price by 20%',
+          price: priceUpMRR,
+          desc: 'Same users, stronger monetization'
+        },
+        {
+          name: 'Reduce churn by 2%',
+          price: lowerChurnFinal.mrr,
+          desc: 'Same price, healthier retention'
+        }
+      ].map(s => `
+        <div class="scenario-card">
+          <div class="scenario-top">
+            <div class="scenario-name">${s.name}</div>
+            <div class="scenario-price">${fmtMoney(s.price)}</div>
+          </div>
+          <div class="scenario-desc">${s.desc}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('breakdownRows').innerHTML = [
+        ['Preset', activePreset.name],
+        ['Billing period', activeBillingPeriod],
+        ['Billing price', `${fmtMoney(price)} / ${activeBillingPeriod}`],
+        ['Monthly equivalent price', fmtMoney(monthlyEquivalentPrice)],
+        ['Starting users', startingUsers.toLocaleString()],
+        ['New users / month', newUsers.toLocaleString()],
+        ['Monthly churn', fmtPct(churn * 100)],
+        ['Monthly operating costs', fmtMoney(monthlyCosts)],
+        ['Current MRR', fmtMoney(currentMRR)],
+        ['Current monthly profit', fmtMoney(currentProfit)],
+        ['Break-even users', breakEvenUsers === Infinity ? '∞' : breakEvenUsers.toLocaleString()],
+        ['LTV', ltvLabel],
+        ['CAC', fmtMoney(cac)],
+        ['LTV / CAC', ltvToCacLabel]
+      ].map(row => `
+        <tr>
+          <td>${row[0]}</td>
+          <td class="mono">${row[1]}</td>
+        </tr>
+      `).join('');
+
+      const timelinePoints = [monthOne, monthTwelve, finalRow]
+        .filter((v, i, arr) => arr.findIndex(x => x.month === v.month) === i);
+
+      document.getElementById('timelineGrid').innerHTML = timelinePoints.map(r => `
+        <div class="timeline-card">
+          <div class="timeline-top">
+            <div class="timeline-name">Month ${r.month}</div>
+            <div class="timeline-price">${fmtMoney(r.mrr)}</div>
+          </div>
+          <div class="timeline-desc">
+            ${Math.round(r.endUsers).toLocaleString()} users · ${fmtMoney(r.profit)} monthly profit
+          </div>
+        </div>
+      `).join('');
+
+      const totalForBar = Math.max(1, monthlyCosts + Math.max(currentProfit, 0) + Math.max(monthlyEquivalentPrice * startingUsers * churn, 0));
+      const costPct = (monthlyCosts / totalForBar) * 100;
+      const profitPct = (Math.max(currentProfit, 0) / totalForBar) * 100;
+      const churnValue = monthlyEquivalentPrice * startingUsers * churn;
+      const churnPct = (Math.max(churnValue, 0) / totalForBar) * 100;
+
+      document.getElementById('revenueBar').innerHTML = `
+        <div class="bar-seg" style="width:${costPct}%;background:var(--red)">${costPct > 12 ? 'Costs' : ''}</div>
+        <div class="bar-seg" style="width:${churnPct}%;background:var(--amber)">${churnPct > 12 ? 'Churn drag' : ''}</div>
+        <div class="bar-seg" style="width:${profitPct}%;background:var(--green)">${profitPct > 12 ? 'Profit' : ''}</div>
+      `;
+
+      document.getElementById('revenueLegend').innerHTML = `
+        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Monthly costs — ${fmtMoney(monthlyCosts)}</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Revenue drag from churn — ${fmtMoney(churnValue)}</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Current profit — ${fmtMoney(Math.max(currentProfit,0))}</div>
+      `;
+    }
+
+    renderPresets();
+    renderModes();
+    renderBillingPeriods();
+    pickPreset(activePreset.id);
+
+    // ── PREVIEW CHART (blurred, decorative) ──────────────────
+    setTimeout(function() {
+      var canvas = document.getElementById('growthChartPreview');
+      if (!canvas || typeof Chart === 'undefined') return;
+      var labels = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+      var data   = [500,820,1240,1780,2450,3200,4100,5150,6380,7720,9200,10900];
+      var isDark = document.documentElement.dataset.theme === 'dark';
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'MRR',
+            data: data,
+            borderColor: '#b85c2a',
+            backgroundColor: 'rgba(184,92,42,0.12)',
+            borderWidth: 2,
+            pointRadius: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#7a7268' } },
+            y: { grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#7a7268', callback: v => '$'+(v/1000).toFixed(0)+'k' } }
+          }
+        }
+      });
+    }, 300);
+  </script>
+</body>
+</html>
