@@ -6,6 +6,7 @@
   <title>SaaS Growth Simulator</title>
   <link rel="icon" type="image/png" href="KP.png">
   <link href="https://fonts.googleapis.com/css2?family=Georgia&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -64,7 +65,7 @@
       --shadow2:  0 2px 12px rgba(0,0,0,0.4);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: auto; }
 
     body {
       background: var(--bg);
@@ -846,6 +847,577 @@
       }
       .divider { margin: 1.5rem 0; }
     }
+
+    /* ── PRO BADGE ── */
+    .pro-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 20px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── CHART (Pro) ── */
+    .chart-container { position: relative; height: 260px; width: 100%; }
+
+    /* ── PRO LOCK WRAPPER ── */
+    .pro-lock-wrap {
+      position: relative;
+      border-radius: var(--r2);
+      overflow: hidden;
+    }
+    .pro-blur-inner {
+      filter: blur(3px);
+      pointer-events: none;
+      user-select: none;
+      opacity: .85;
+    }
+    .pro-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, rgba(250,247,242,0.55) 0%, rgba(243,239,232,0.7) 100%);
+      backdrop-filter: blur(0px);
+      gap: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      z-index: 10;
+    }
+    [data-theme="dark"] .pro-overlay {
+      background: linear-gradient(160deg, rgba(16,14,11,0.55) 0%, rgba(24,21,16,0.7) 100%);
+    }
+    .pro-overlay-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .pro-overlay-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .pro-overlay-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .pro-overlay-desc {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 340px;
+    }
+    .pro-overlay-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .pro-overlay-btn:hover {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+    .pro-overlay-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-width: 380px;
+    }
+    .pro-feat-chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 3px 10px;
+    }
+
+    /* ── STRIPE MODAL ── */
+    .stripe-modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,22,18,.55);
+      backdrop-filter: blur(4px);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    .stripe-modal-bg.open { display: flex; }
+    .stripe-modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      width: 100%;
+      max-width: 480px;
+      margin: 1rem;
+      box-shadow: 0 8px 40px rgba(26,22,18,.18);
+      overflow: hidden;
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+    .stripe-modal-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stripe-modal-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+    }
+    .stripe-modal-close {
+      font-family: var(--mono);
+      font-size: 18px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color .15s;
+    }
+    .stripe-modal-close:hover { color: var(--text); }
+    .stripe-modal-body { padding: 24px; }
+    .stripe-price-display {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: var(--accent-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .stripe-price-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .stripe-price-amount {
+      font-family: var(--serif);
+      font-size: 48px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stripe-price-period {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .stripe-features-list {
+      list-style: none;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stripe-features-list li {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stripe-features-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .stripe-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .stripe-field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stripe-input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .stripe-input:focus { border-color: var(--accent); }
+    #stripe-card-element {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 13px 14px;
+      transition: border-color .15s;
+    }
+    #stripe-card-element.StripeElement--focus { border-color: var(--accent); }
+    .stripe-pay-btn {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 6px;
+    }
+    .stripe-pay-btn:hover { background: var(--accent2); }
+    .stripe-pay-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .stripe-error {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 10px;
+      min-height: 18px;
+    }
+    .stripe-secure {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--faint);
+      text-align: center;
+      margin-top: 14px;
+      letter-spacing: .04em;
+    }
+
+    /* ── NAV UPGRADE BUTTON ── */
+    .upgrade-nav-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .upgrade-nav-btn:hover { background: var(--accent); color: #fff; }
+
+    /* Tab bar styles for Growth Lab preview */
+    .tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;gap:0}
+    .tab-btn{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:10px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;margin-bottom:-1px;white-space:nowrap}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .sb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .sb-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+    .sb-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+    .sb-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+    .sb-field label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .sb-field input{font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);outline:none;width:100%}
+    .sb-result{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .sb-mrr{font-family:var(--mono);font-size:22px}
+    .sb-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+    .sens-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+    .sens-table th{padding:8px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-weight:500;text-align:center}
+    .sens-table td{padding:7px 10px;border:1px solid var(--border);text-align:center}
+    .payback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .payback-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+    .pb-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .pb-val{font-family:var(--mono);font-size:24px}
+    .tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .tier-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+    .tier-name{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .tier-mrr{font-family:var(--mono);font-size:15px;color:var(--accent);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+    .cbad{background:var(--red-bg);color:var(--red)}.cok{background:var(--amber-bg);color:var(--amber)}.cgood{background:var(--green-bg);color:var(--green)}
+    .sens-table .rhdr{background:var(--bg3);color:var(--muted);text-align:left}
+    .cohort-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+    .cohort-table th{padding:7px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-weight:500;text-align:center}
+    .cohort-table td{padding:6px 10px;border:1px solid var(--border);text-align:center}
+    .cohort-table .clbl{text-align:left;background:var(--bg2);color:var(--muted)}
+  
+
+    /* ── ENHANCED PRO SECTIONS ── */
+    .pro-mini-preview{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      width:100%;
+    }
+    .pro-mini-card{
+      background:linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 14px 12px;
+      min-height:86px;
+      box-shadow:var(--shadow);
+    }
+    .pro-mini-k{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    .pro-mini-v{
+      font-family:var(--serif);
+      font-size:22px;
+      line-height:1;
+      color:var(--text);
+      margin-bottom:6px;
+    }
+    .pro-mini-s{
+      font-family:var(--mono);
+      font-size:10px;
+      line-height:1.7;
+      color:var(--muted);
+    }
+    .pro-teaser-stack{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      width:100%;
+    }
+    .pro-teaser-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:12px 14px;
+      background:linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+    .pro-teaser-copy{display:flex;flex-direction:column;gap:3px}
+    .pro-teaser-copy strong{
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-weight:500;
+      color:var(--text);
+    }
+    .pro-teaser-copy span{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .pro-teaser-pill{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--accent);
+      background:var(--accent-bg);
+      border:1px solid rgba(184,92,42,.18);
+      border-radius:999px;
+      padding:5px 9px;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .growth-lab-shell{
+      position:relative;
+      background:
+        radial-gradient(circle at top left, rgba(184,92,42,.10), transparent 36%),
+        linear-gradient(180deg,var(--surface),var(--bg2));
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:26px;
+      box-shadow:0 12px 36px rgba(26,22,18,.08);
+      overflow:hidden;
+    }
+    .growth-lab-shell::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(184,92,42,.05), transparent 42%);
+      pointer-events:none;
+    }
+    .growth-lab-intro{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 260px;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:20px;
+      position:relative;
+      z-index:1;
+    }
+    .growth-lab-copy{
+      background:rgba(255,255,255,.46);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:20px 22px;
+      backdrop-filter:blur(6px);
+    }
+    [data-theme="dark"] .growth-lab-copy{background:rgba(36,31,25,.48)}
+    .growth-lab-kicker{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:10px;
+    }
+    .growth-lab-copy h3{
+      font-family:var(--serif);
+      font-size:34px;
+      line-height:1.02;
+      font-weight:400;
+      margin-bottom:10px;
+    }
+    .growth-lab-copy p{
+      font-family:var(--mono);
+      font-size:11px;
+      line-height:1.9;
+      color:var(--muted);
+      max-width:560px;
+    }
+    .growth-lab-side{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .growth-side-label{
+      font-family:var(--mono);
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .growth-side-price{
+      font-family:var(--serif);
+      font-size:40px;
+      line-height:1;
+      color:var(--accent);
+    }
+    .growth-side-note{
+      font-family:var(--mono);
+      font-size:10px;
+      line-height:1.8;
+      color:var(--muted);
+    }
+    .growth-side-tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .growth-side-tags span{
+      font-family:var(--mono);
+      font-size:9px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--bg2);
+      color:var(--muted);
+    }
+    .growth-tabs-wrap{
+      position:relative;
+      z-index:1;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:20px;
+      background:rgba(255,255,255,.38);
+      backdrop-filter:blur(6px);
+    }
+    [data-theme="dark"] .growth-tabs-wrap{background:rgba(36,31,25,.42)}
+    .gl-overlay-card{
+      background:var(--surface);
+      border:1px solid var(--border2);
+      border-radius:22px;
+      padding:30px 32px;
+      max-width:500px;
+      width:100%;
+      box-shadow:0 16px 44px rgba(26,22,18,.16);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      text-align:center;
+    }
+    .gl-overlay-topline{
+      font-family:var(--mono);
+      font-size:9px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      background:var(--accent);
+      color:#fff;
+      padding:4px 12px;
+      border-radius:999px;
+    }
+    .gl-overlay-card h3{
+      font-family:var(--serif);
+      font-size:30px;
+      line-height:1.05;
+      font-weight:400;
+      color:var(--text);
+    }
+    .gl-overlay-card p{
+      font-family:var(--mono);
+      font-size:11px;
+      line-height:1.9;
+      color:var(--muted);
+      max-width:380px;
+    }
+    .gl-secure-note{
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--faint);
+      letter-spacing:.03em;
+    }
+    @media(max-width:960px){
+      .growth-lab-intro{grid-template-columns:1fr}
+    }
+    @media(max-width:640px){
+      .pro-mini-preview{grid-template-columns:1fr}
+      .growth-lab-shell{padding:18px}
+      .growth-tabs-wrap{padding:14px}
+      .gl-overlay-card{padding:22px 20px}
+      .gl-overlay-card h3{font-size:26px}
+      .growth-lab-copy h3{font-size:28px}
+      .pro-teaser-row{align-items:flex-start;flex-direction:column}
+    }
+
   </style>
 </head>
 <body>
@@ -854,7 +1426,9 @@
     <div class="nav-right">
       <a class="nav-link" href="#calculator">Calculator</a>
       <a class="nav-link" href="#timeline">Timeline</a>
+      <a class="nav-link" href="#pro-preview">Growth Lab</a>
       <a class="nav-link" href="#tips">Tips</a>
+      <button class="upgrade-nav-btn" onclick="openStripeModal()">Pro ✦</button>
       <button class="theme-btn" onclick="window.print()">Save / Print</button>
       <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark mode</button>
     </div>
@@ -1002,6 +1576,30 @@
               <div class="chart-legend" id="revenueLegend"></div>
             </div>
           </div>
+
+          <!-- PRO: Growth Chart (locked) -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Growth chart <span class="pro-badge">Pro</span></span>
+              <div style="display:flex;gap:6px">
+                <button class="period-btn active" disabled>MRR</button>
+                <button class="period-btn" disabled>Users</button>
+                <button class="period-btn" disabled>Profit</button>
+              </div>
+            </div>
+            <div class="pro-lock-wrap">
+              <div class="pro-blur-inner">
+                <div class="chart-container"><canvas id="growthChartPreview"></canvas></div>
+              </div>
+              <div class="pro-overlay">
+                <div class="pro-overlay-icon">📈</div>
+                <div class="pro-overlay-badge">Pro Feature</div>
+                <div class="pro-overlay-title">Interactive Growth Chart</div>
+                <div class="pro-overlay-desc">Toggle between MRR, Users, and Profit projections across your entire runway. Built with Chart.js and live-synced to your inputs.</div>
+                <button class="pro-overlay-btn" onclick="openStripeModal()">Unlock Pro — $35 one-time</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="results">
@@ -1041,17 +1639,193 @@
             </div>
             <div class="scenario-grid" id="scenarioGrid"></div>
           </div>
-        <div class="panel" style="margin-top:0">
-  <div class="panel-label">Pro insights</div>
-  <div class="teaser-box">
-    <h3>Pro insights</h3>
-    <p>Unlock deeper SaaS planning next: pricing tier stress tests, cohort churn analysis, CAC payback timing, growth channel modeling, and a clearer path to sustainable MRR.</p>
-    <div class="action-row">
-     <button class="unlock-btn">Unlock Pro</button>
-       </div>
+
+          <!-- PRO: Insights teaser panel -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-label">Pro insights <span class="pro-badge">Pro</span></span>
+            </div>
+            <div class="pro-lock-wrap">
+              <div class="pro-blur-inner" style="padding:8px 0">
+                <div class="pro-mini-preview">
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Sensitivity</div>
+                    <div class="pro-mini-v">5×5</div>
+                    <div class="pro-mini-s">price × churn matrix with break-even color cues</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Cohorts</div>
+                    <div class="pro-mini-v">12 mo</div>
+                    <div class="pro-mini-s">retention snapshots across every new user batch</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Payback</div>
+                    <div class="pro-mini-v">LTV/CAC</div>
+                    <div class="pro-mini-s">see how fast acquisition spend comes back</div>
+                  </div>
+                  <div class="pro-mini-card">
+                    <div class="pro-mini-k">Scenarios</div>
+                    <div class="pro-mini-v">3 views</div>
+                    <div class="pro-mini-s">base, optimistic, and downside models side by side</div>
+                  </div>
+                </div>
+              </div>
+              <div class="pro-overlay" style="padding:20px 16px">
+                <div class="pro-overlay-badge">Growth Lab</div>
+                <div class="pro-overlay-title" style="font-size:18px">Unlock the full Growth Lab</div>
+                <div class="pro-overlay-desc" style="max-width:320px">Cleaner planning tools, faster what-if checks, and better pressure-testing before you commit to a growth path.</div>
+                <button class="pro-overlay-btn" onclick="openStripeModal()">Unlock Pro — $35 one-time</button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="pro-preview">
+      <div class="section-head">
+        <span class="section-title">Growth Lab <span class="pro-badge">Pro</span></span>
+        <span class="section-sub">scenario builder · sensitivity · cohorts · CAC payback · pricing tiers</span>
+      </div>
+
+      <div class="growth-lab-shell">
+        <div class="growth-lab-intro">
+          <div class="growth-lab-copy">
+            <div class="growth-lab-kicker">Founder-level planning</div>
+            <h3>Pressure-test the model<br><em>before growth gets expensive.</em></h3>
+            <p>Growth Lab takes the nice-looking headline numbers and pushes them harder. Check how churn reshapes revenue, compare upside versus downside, and spot weak assumptions before you spend more on acquisition.</p>
+          </div>
+          <div class="growth-lab-side">
+            <div class="growth-side-label">One-time unlock</div>
+            <div class="growth-side-price">$35</div>
+            <div class="growth-side-note">Lifetime access to the premium planning layer for this tool.</div>
+            <div class="growth-side-tags"><span>Scenario Builder</span><span>Sensitivity Grid</span><span>Cohorts</span><span>CAC Payback</span></div>
+          </div>
         </div>
+
+      <div class="pro-lock-wrap">
+        <div class="pro-blur-inner">
+
+          <div class="growth-tabs-wrap">
+          <div class="tab-bar">
+            <button class="tab-btn active">Scenario Builder</button>
+            <button class="tab-btn">Sensitivity Matrix</button>
+            <button class="tab-btn">Cohort Analysis</button>
+            <button class="tab-btn">CAC Payback</button>
+            <button class="tab-btn">Pricing Tiers</button>
+          </div>
+
+          <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:16px">Edit each scenario and compare projected MRR side by side. Base is pulled from your current inputs.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <button class="mini-btn">Save current scenario</button>
+            <select style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none"><option>Load a saved scenario…</option></select>
+            <button class="mini-btn">Delete selected</button>
+          </div>
+          <div class="sb-grid">
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--muted)">Base</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="6" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--muted)">$7,840</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">312 users · $4,640/mo profit</div></div>
+            </div>
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--green)">Optimistic</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="24" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="26" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="5" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--green)">$14,208</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">498 users · $13,008/mo profit</div></div>
+            </div>
+            <div class="sb-col">
+              <div class="sb-title" style="color:var(--red)">Pessimistic</div>
+              <div class="sb-field"><label>Price/mo ($)</label><input type="number" value="20" readonly></div>
+              <div class="sb-field"><label>New users/mo</label><input type="number" value="14" readonly></div>
+              <div class="sb-field"><label>Churn (%)</label><input type="number" value="8" readonly></div>
+              <div class="sb-field"><label>Costs ($)</label><input type="number" value="1200" readonly></div>
+              <div class="sb-result"><div class="sb-mrr" style="color:var(--red)">$3,120</div><div class="sb-sub">MRR after 12 months</div><div class="sb-sub">156 users · $1,920/mo profit</div></div>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;margin-bottom:6px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Final MRR across combinations of monthly price and churn. Green = above break-even, red = below.</p>
+            <div style="overflow-x:auto">
+              <table class="sens-table">
+                <thead><tr><th>Price / Churn</th><th>2.0% churn</th><th>4.0% churn</th><th>6.0% churn</th><th>8.0% churn</th><th>10.0% churn</th></tr></thead>
+                <tbody>
+                  <tr><td class="rhdr">$12/mo</td><td class="cgood">$5,280</td><td class="cgood">$3,960</td><td class="cok">$2,640</td><td class="cbad">$1,560</td><td class="cbad">$960</td></tr>
+                  <tr><td class="rhdr">$16/mo</td><td class="cgood">$7,040</td><td class="cgood">$5,280</td><td class="cgood">$3,520</td><td class="cok">$2,080</td><td class="cbad">$1,280</td></tr>
+                  <tr><td class="rhdr">$20/mo</td><td class="cgood">$8,800</td><td class="cgood">$6,600</td><td class="cgood">$4,400</td><td class="cok">$2,600</td><td class="cok">$1,600</td></tr>
+                  <tr><td class="rhdr">$24/mo</td><td class="cgood">$10,560</td><td class="cgood">$7,920</td><td class="cgood">$5,280</td><td class="cgood">$3,120</td><td class="cok">$1,920</td></tr>
+                  <tr><td class="rhdr">$30/mo</td><td class="cgood">$13,200</td><td class="cgood">$9,900</td><td class="cgood">$6,600</td><td class="cgood">$3,900</td><td class="cok">$2,400</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Each row = a monthly cohort of new users. Columns show surviving users after N months at your churn rate.</p>
+            <div style="overflow-x:auto">
+              <table class="cohort-table">
+                <thead><tr><th>Cohort</th><th>M+0</th><th>M+1</th><th>M+2</th><th>M+3</th><th>M+4</th><th>M+5</th><th>M+6</th></tr></thead>
+                <tbody>
+                  <tr><td class="clbl">Cohort 1 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                  <tr><td class="clbl">Cohort 2 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                  <tr><td class="clbl">Cohort 3 (20 users)</td><td style="background:rgba(40,150,40,0.18)">20<br><span style="font-size:9px;color:var(--muted)">100%</span></td><td style="background:rgba(80,140,40,0.18)">19<br><span style="font-size:9px;color:var(--muted)">94%</span></td><td style="background:rgba(100,130,40,0.18)">18<br><span style="font-size:9px;color:var(--muted)">88%</span></td><td style="background:rgba(130,120,40,0.18)">16<br><span style="font-size:9px;color:var(--muted)">83%</span></td><td style="background:rgba(150,110,40,0.18)">15<br><span style="font-size:9px;color:var(--muted)">78%</span></td><td style="background:rgba(170,90,40,0.18)">14<br><span style="font-size:9px;color:var(--muted)">73%</span></td><td style="background:rgba(190,70,40,0.18)">13<br><span style="font-size:9px;color:var(--muted)">69%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">How long does it take to recover what you spend to acquire each user?</p>
+            <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px">Gross margin <input type="number" value="80" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"> %</div>
+            <div class="payback-grid">
+              <div class="payback-card"><div class="pb-label">CAC Payback Period</div><div class="pb-val" style="color:var(--green)">9.4 mo</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">to recover $15 CAC</div></div>
+              <div class="payback-card"><div class="pb-label">Avg User Lifetime</div><div class="pb-val">16.7 mo</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">at 6.0% monthly churn</div></div>
+              <div class="payback-card"><div class="pb-label">LTV (gross margin)</div><div class="pb-val" style="color:var(--accent)">$267</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px">LTV/CAC = 17.8x</div></div>
+            </div>
+            <div class="info-box">Payback of 9.4 months is healthy. With a 17.8x LTV/CAC ratio, you have room to invest more in growth.</div>
+          </div>
+
+          <div style="margin-top:28px">
+            <p style="font-size:13px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">Model up to 4 pricing tiers. Set price and estimated users per tier to see blended MRR and ARPU.</p>
+            <div class="tier-grid">
+              <div class="tier-card"><div class="tier-name">Starter</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="9" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="50" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$450/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Basic</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="19" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="30" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$570/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Pro</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="49" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="15" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$735/mo</div></div>
+              <div class="tier-card"><div class="tier-name">Enterprise</div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px"><span>$</span><input type="number" value="149" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>/mo</span></div><div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)"><input type="number" value="5" readonly style="font-family:var(--mono);font-size:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;width:70px;color:var(--text);outline:none"><span>users</span></div><div class="tier-mrr">$745/mo</div></div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-top:14px;font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">Blended MRR: <span style="color:var(--text)">$2,500</span>&nbsp;&nbsp;·&nbsp;&nbsp;Blended ARPU: <span style="color:var(--text)">$25</span>&nbsp;&nbsp;·&nbsp;&nbsp;Total users: <span style="color:var(--text)">100</span></div>
+          </div>
+
+          </div>
+        </div><!-- /pro-blur-inner -->
+
+        <!-- Lock overlay -->
+        <div class="pro-overlay">
+          <div class="gl-overlay-card">
+            <div class="gl-overlay-topline">One-time unlock · $35</div>
+            <h3>Everything in Growth Lab,<br><em>unlocked for good.</em></h3>
+            <p>Get the polished premium planning layer: compare scenarios, stress-test churn, inspect cohorts, and understand payback with a cleaner, higher-converting upgrade section.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:390px">
+              <span class="pro-feat-chip">📊 Scenario Builder</span>
+              <span class="pro-feat-chip">🔥 Sensitivity Matrix</span>
+              <span class="pro-feat-chip">👥 Cohort Analysis</span>
+              <span class="pro-feat-chip">💰 CAC Payback</span>
+              <span class="pro-feat-chip">🏷️ Pricing Tiers</span>
+              <span class="pro-feat-chip">📈 Growth Chart</span>
+              <span class="pro-feat-chip">↓ CSV Export</span>
+            </div>
+            <a href="https://buy.stripe.com/14AfZadxb0k82ktbGeaR202" target="_blank" class="pro-overlay-btn" style="text-decoration:none;display:inline-block">Unlock Pro — $35 one-time →</a>
+            <div class="gl-secure-note">🔒 Secure checkout via Stripe · instant access after purchase</div>
+          </div>
         </div>
+
+      </div><!-- /pro-lock-wrap -->
       </div>
     </section>
 
@@ -1088,9 +1862,55 @@
 
     <footer>
       <div>SaaS Growth Simulator · Built to test whether your product can really scale.</div>
-      <div style="margin-top:.5rem">See if your SaaS idea actually works before you build it.</div>
+      <div style="margin-top:.5rem">Upgrade to Pro for the full Growth Lab — scenario builder, cohorts, payback, sensitivity, tiers.</div>
     </footer>
   </div>
+
+  <!-- ── STRIPE MODAL ── -->
+  <div class="stripe-modal-bg" id="stripeModalBg" onclick="handleModalBgClick(event)">
+    <div class="stripe-modal">
+      <div class="stripe-modal-hdr">
+        <div class="stripe-modal-title">Upgrade to <em>Pro</em></div>
+        <button class="stripe-modal-close" onclick="closeStripeModal()">×</button>
+      </div>
+      <div class="stripe-modal-body">
+        <div class="stripe-price-display">
+          <div class="stripe-price-label">KatTools Pro</div>
+          <div class="stripe-price-amount">$35</div>
+          <div class="stripe-price-period">one-time payment · lifetime access</div>
+        </div>
+        <ul class="stripe-features-list">
+          <li>Interactive growth chart (MRR, Users, Profit)</li>
+          <li>Scenario Builder — Base, Optimistic, Pessimistic</li>
+          <li>Sensitivity Matrix — price × churn grid</li>
+          <li>Cohort Analysis — 6 cohorts × 12 months</li>
+          <li>CAC Payback &amp; LTV/CAC calculator</li>
+          <li>Pricing Tiers — 4-tier blended ARPU</li>
+          <li>CSV export of all projections</li>
+        </ul>
+        <a href="https://buy.stripe.com/14AfZadxb0k82ktbGeaR202" target="_blank" class="stripe-pay-btn" style="text-decoration:none;display:block;text-align:center;line-height:normal;padding-top:14px;padding-bottom:14px">
+          Pay $35 once →
+        </a>
+        <div class="stripe-secure">🔒 Secured by Stripe · SSL encrypted · one-time checkout</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── STRIPE MODAL ─────────────────────────────────────────
+    function openStripeModal() {
+      document.getElementById('stripeModalBg').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeStripeModal() {
+      document.getElementById('stripeModalBg').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function handleModalBgClick(e) {
+      if (e.target === document.getElementById('stripeModalBg')) closeStripeModal();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStripeModal(); });
+  </script>
 
   <script>
     function toggleTheme(){
@@ -1657,6 +2477,40 @@
     renderModes();
     renderBillingPeriods();
     pickPreset(activePreset.id);
+
+    // ── PREVIEW CHART (blurred, decorative) ──────────────────
+    setTimeout(function() {
+      var canvas = document.getElementById('growthChartPreview');
+      if (!canvas || typeof Chart === 'undefined') return;
+      var labels = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+      var data   = [500,820,1240,1780,2450,3200,4100,5150,6380,7720,9200,10900];
+      var isDark = document.documentElement.dataset.theme === 'dark';
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'MRR',
+            data: data,
+            borderColor: '#b85c2a',
+            backgroundColor: 'rgba(184,92,42,0.12)',
+            borderWidth: 2,
+            pointRadius: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#7a7268' } },
+            y: { grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#7a7268', callback: v => '$'+(v/1000).toFixed(0)+'k' } }
+          }
+        }
+      });
+    }, 300);
   </script>
 </body>
 </html>
